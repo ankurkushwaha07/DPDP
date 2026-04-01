@@ -1,0 +1,309 @@
+"""
+Pre-computed demo scenarios for the DPDP Compliance Copilot.
+
+Returns instant results — no LLM calls, no database writes.
+Used by GET /api/demo/{scenario} endpoint.
+
+Three scenarios:
+1. ecommerce — ShopEasy: e-commerce with financial + behavioral data
+2. edtech — LearnBharat: K-12 platform with children's data
+3. healthtech — MedConnect: telemedicine with health + biometric data
+"""
+
+from typing import Optional
+
+
+def get_demo_result(scenario: str) -> Optional[dict]:
+    """
+    Get pre-computed demo result for a scenario.
+
+    Args:
+        scenario: One of "ecommerce", "edtech", "healthtech"
+
+    Returns:
+        Full StatusResponse-compatible dict, or None if invalid scenario.
+    """
+    scenarios = {
+        "ecommerce": _ecommerce_demo(),
+        "edtech": _edtech_demo(),
+        "healthtech": _healthtech_demo(),
+    }
+    return scenarios.get(scenario.lower())
+
+
+def _ecommerce_demo() -> dict:
+    """ShopEasy — Indian e-commerce platform."""
+    return {
+        "analysis_id": "demo-ecommerce-001",
+        "status": "completed",
+        "result": {
+            "data_classifications": [
+                {
+                    "field_name": "name",
+                    "categories": ["identifiers"],
+                    "risk_level": "medium",
+                    "reasoning": "Direct personal identifier",
+                    "confidence": 0.95,
+                },
+                {
+                    "field_name": "email",
+                    "categories": ["identifiers"],
+                    "risk_level": "medium",
+                    "reasoning": "Direct personal identifier used for account and communication",
+                    "confidence": 0.96,
+                },
+                {
+                    "field_name": "phone",
+                    "categories": ["identifiers"],
+                    "risk_level": "medium",
+                    "reasoning": "Direct personal identifier",
+                    "confidence": 0.95,
+                },
+                {
+                    "field_name": "address",
+                    "categories": ["identifiers"],
+                    "risk_level": "medium",
+                    "reasoning": "Physical address is PII used for delivery",
+                    "confidence": 0.94,
+                },
+                {
+                    "field_name": "credit_card_number",
+                    "categories": ["financial"],
+                    "risk_level": "high",
+                    "reasoning": "Sensitive financial instrument requiring enhanced safeguards under DPDP",
+                    "confidence": 0.98,
+                },
+                {
+                    "field_name": "upi_id",
+                    "categories": ["financial"],
+                    "risk_level": "high",
+                    "reasoning": "Financial payment identifier linked to bank account",
+                    "confidence": 0.97,
+                },
+                {
+                    "field_name": "browsing_history",
+                    "categories": ["behavioral"],
+                    "risk_level": "medium",
+                    "reasoning": "Behavioral tracking data subject to purpose limitation",
+                    "confidence": 0.92,
+                },
+                {
+                    "field_name": "purchase_history",
+                    "categories": ["behavioral"],
+                    "risk_level": "medium",
+                    "reasoning": "Behavioral purchase patterns",
+                    "confidence": 0.91,
+                },
+                {
+                    "field_name": "gps_location",
+                    "categories": ["behavioral"],
+                    "risk_level": "medium",
+                    "reasoning": "Real-time location tracking for delivery",
+                    "confidence": 0.93,
+                },
+            ],
+            "applicable_obligations": [
+                {
+                    "category": "consent",
+                    "description": "Consent collection, notice, and withdrawal",
+                    "act_sections": ["Section 5", "Section 6"],
+                    "rules_refs": ["Rule 3", "Rule 4"],
+                    "triggered_by": ["identifiers", "financial", "behavioral"],
+                },
+                {
+                    "category": "purpose_limitation",
+                    "description": "Processing only for stated lawful purposes",
+                    "act_sections": ["Section 4", "Section 7"],
+                    "rules_refs": [],
+                    "triggered_by": ["identifiers", "financial", "behavioral"],
+                },
+                {
+                    "category": "data_principal_rights",
+                    "description": "Access, correction, erasure, grievance redressal, nomination rights",
+                    "act_sections": ["Section 11", "Section 12", "Section 13", "Section 14"],
+                    "rules_refs": ["Rule 7", "Rule 8"],
+                    "triggered_by": ["identifiers", "financial", "behavioral"],
+                },
+                {
+                    "category": "security_safeguards",
+                    "description": "Reasonable security safeguards including encryption and access control",
+                    "act_sections": ["Section 8(4)"],
+                    "rules_refs": ["Rule 5"],
+                    "triggered_by": ["identifiers", "financial", "behavioral"],
+                },
+                {
+                    "category": "breach_notification",
+                    "description": "Notify Data Protection Board and affected Data Principals of breaches",
+                    "act_sections": ["Section 8(6)"],
+                    "rules_refs": ["Rule 6"],
+                    "triggered_by": ["identifiers", "financial", "behavioral"],
+                },
+                {
+                    "category": "data_retention",
+                    "description": "Erase data when purpose is fulfilled or consent is withdrawn",
+                    "act_sections": ["Section 8(7)"],
+                    "rules_refs": [],
+                    "triggered_by": ["identifiers", "financial", "behavioral"],
+                },
+                {
+                    "category": "significant_data_fiduciary",
+                    "description": "DPO appointment, DPIA, independent audit obligations",
+                    "act_sections": ["Section 10"],
+                    "rules_refs": ["Rule 12"],
+                    "triggered_by": ["financial"],
+                },
+            ],
+            "gap_report": [
+                {
+                    "obligation": "consent",
+                    "section_ref": "Section 5, Section 6, Rule 3",
+                    "status": "missing",
+                    "gap_description": "No consent notice found. Privacy policy does not specify purpose for each data type collected.",
+                    "recommended_action": "Draft a DPDP-compliant consent notice under Section 6(1) specifying each data type and its processing purpose. Implement consent withdrawal mechanism.",
+                    "severity": "critical",
+                    "confidence": 0.90,
+                    "matched_dpdp_text": "Section 6: Consent must be free, specific, informed, unconditional, and unambiguous.",
+                },
+                {
+                    "obligation": "data_principal_rights",
+                    "section_ref": "Section 11, Section 12, Section 13",
+                    "status": "missing",
+                    "gap_description": "No mention of Data Principal rights to access, correct, or erase personal data.",
+                    "recommended_action": "Add a Data Principal Rights section explaining how users can access, correct, and delete their data per Sections 11-14.",
+                    "severity": "critical",
+                    "confidence": 0.88,
+                    "matched_dpdp_text": "Section 11: Data Principal has the right to obtain a summary of personal data being processed.",
+                },
+                {
+                    "obligation": "security_safeguards",
+                    "section_ref": "Section 8(4), Rule 5",
+                    "status": "partial",
+                    "gap_description": "Policy mentions 'industry-standard security' but does not specify encryption, access control, or monitoring per Rule 5.",
+                    "recommended_action": "Detail specific security measures: encryption at rest and in transit, role-based access control, breach monitoring, and logging.",
+                    "severity": "high",
+                    "confidence": 0.82,
+                    "matched_dpdp_text": "Rule 5: Data Fiduciary must implement encryption, access control, monitoring, and logging mechanisms.",
+                },
+                {
+                    "obligation": "breach_notification",
+                    "section_ref": "Section 8(6), Rule 6",
+                    "status": "missing",
+                    "gap_description": "No breach notification procedure or SOP mentioned in existing policy.",
+                    "recommended_action": "Create a Personal Data Breach Response SOP per Rule 6. Must include Board notification timeline and affected Data Principal notification process.",
+                    "severity": "critical",
+                    "confidence": 0.92,
+                    "matched_dpdp_text": "Section 8(6): Data Fiduciary shall notify the Board and affected Data Principals of any personal data breach.",
+                },
+                {
+                    "obligation": "data_retention",
+                    "section_ref": "Section 8(7)",
+                    "status": "missing",
+                    "gap_description": "No data retention or deletion policy found.",
+                    "recommended_action": "Create a retention matrix specifying retention period, legal basis, and deletion trigger for each data category.",
+                    "severity": "high",
+                    "confidence": 0.85,
+                    "matched_dpdp_text": "Section 8(7): Data Fiduciary shall erase personal data when the purpose has been fulfilled or consent is withdrawn.",
+                },
+                {
+                    "obligation": "purpose_limitation",
+                    "section_ref": "Section 4",
+                    "status": "partial",
+                    "gap_description": "Policy states general purposes but does not link specific data fields to specific purposes.",
+                    "recommended_action": "Map each data field to its specific processing purpose. Ensure behavioral data (browsing, location) has clear and limited purpose statements.",
+                    "severity": "medium",
+                    "confidence": 0.78,
+                    "matched_dpdp_text": "Section 4: Personal data may be processed only for a lawful purpose.",
+                },
+                {
+                    "obligation": "significant_data_fiduciary",
+                    "section_ref": "Section 10, Rule 12",
+                    "status": "missing",
+                    "gap_description": "No DPO appointed. No DPIA process documented. Processing financial data at scale likely triggers SDF classification.",
+                    "recommended_action": "Evaluate if you qualify as a Significant Data Fiduciary. If so, appoint a DPO based in India, conduct DPIA, and engage an independent data auditor.",
+                    "severity": "high",
+                    "confidence": 0.75,
+                    "matched_dpdp_text": "Section 10: Significant Data Fiduciary shall appoint a DPO based in India and conduct periodic DPIA.",
+                },
+            ],
+            "overall_risk_score": "high",
+            "compliance_percentage": 14,
+        },
+    }
+
+
+def _edtech_demo() -> dict:
+    """LearnBharat — K-12 EdTech platform with children's data."""
+    return {
+        "analysis_id": "demo-edtech-001",
+        "status": "completed",
+        "result": {
+            "data_classifications": [
+                {"field_name": "student_name", "categories": ["identifiers", "children"], "risk_level": "high", "reasoning": "Child's personal identifier — triggers Section 9", "confidence": 0.97},
+                {"field_name": "age", "categories": ["children"], "risk_level": "high", "reasoning": "Age data confirms minor status, triggers parental consent requirement", "confidence": 0.98},
+                {"field_name": "school", "categories": ["children"], "risk_level": "high", "reasoning": "Educational institution linked to child", "confidence": 0.95},
+                {"field_name": "grade", "categories": ["children"], "risk_level": "high", "reasoning": "Educational grade data of minor", "confidence": 0.94},
+                {"field_name": "parent_email", "categories": ["identifiers", "children"], "risk_level": "high", "reasoning": "Parent/guardian contact for consent verification", "confidence": 0.96},
+                {"field_name": "quiz_scores", "categories": ["children", "behavioral"], "risk_level": "high", "reasoning": "Performance data of minor student", "confidence": 0.93},
+                {"field_name": "learning_style", "categories": ["children", "behavioral"], "risk_level": "high", "reasoning": "Behavioral profiling of child — potentially violates Section 9 ad tracking ban", "confidence": 0.91},
+            ],
+            "applicable_obligations": [
+                {"category": "consent", "description": "Consent collection, notice, and withdrawal", "act_sections": ["Section 5", "Section 6"], "rules_refs": ["Rule 3"], "triggered_by": ["identifiers", "children"]},
+                {"category": "children_data", "description": "Verifiable parental consent for minors under 18; no behavioral tracking of children", "act_sections": ["Section 9"], "rules_refs": ["Rule 10"], "triggered_by": ["children"]},
+                {"category": "data_principal_rights", "description": "Access, correction, erasure rights", "act_sections": ["Section 11", "Section 12", "Section 13", "Section 14"], "rules_refs": ["Rule 7", "Rule 8"], "triggered_by": ["identifiers", "children"]},
+                {"category": "security_safeguards", "description": "Reasonable security safeguards", "act_sections": ["Section 8(4)"], "rules_refs": ["Rule 5"], "triggered_by": ["identifiers", "children"]},
+                {"category": "breach_notification", "description": "Notify Board and Data Principals of breaches", "act_sections": ["Section 8(6)"], "rules_refs": ["Rule 6"], "triggered_by": ["identifiers", "children"]},
+                {"category": "data_retention", "description": "Erase data when purpose fulfilled", "act_sections": ["Section 8(7)"], "rules_refs": [], "triggered_by": ["identifiers", "children"]},
+            ],
+            "gap_report": [
+                {"obligation": "children_data", "section_ref": "Section 9, Rule 10", "status": "missing", "gap_description": "No parental consent mechanism exists. No mention of verifiable guardian consent. Learning style tracking may constitute behavioral monitoring banned under Section 9.", "recommended_action": "Implement verifiable parental consent flow per Rule 10. Remove or disable any behavioral monitoring/profiling of students. Add explicit ban on targeted advertising to students.", "severity": "critical", "confidence": 0.94, "matched_dpdp_text": "Section 9: Obtain verifiable consent of parent/guardian. No tracking, behavioral monitoring, or targeted advertising of children."},
+                {"obligation": "consent", "section_ref": "Section 5, Section 6", "status": "missing", "gap_description": "No consent notice found for data collection from minors or parents.", "recommended_action": "Create age-appropriate consent notice. Ensure parental consent is obtained before any data processing of minors.", "severity": "critical", "confidence": 0.92, "matched_dpdp_text": "Section 6: Consent must be free, specific, informed, and unambiguous."},
+                {"obligation": "data_principal_rights", "section_ref": "Section 11-14", "status": "missing", "gap_description": "No mechanism for parents to access, correct, or delete their child's data.", "recommended_action": "Build a parent dashboard with data access, correction, and deletion capabilities. Parents act as Data Principals for their children.", "severity": "critical", "confidence": 0.88, "matched_dpdp_text": "Section 12: Data Principal may request correction or erasure of personal data."},
+                {"obligation": "breach_notification", "section_ref": "Section 8(6), Rule 6", "status": "missing", "gap_description": "No breach notification procedure. Children's data breaches carry enhanced severity.", "recommended_action": "Create breach SOP with expedited notification for children's data. Notify parents immediately.", "severity": "critical", "confidence": 0.90, "matched_dpdp_text": "Section 8(6): Notify Board and affected Data Principals of breach."},
+                {"obligation": "security_safeguards", "section_ref": "Section 8(4), Rule 5", "status": "partial", "gap_description": "Basic security mentioned but no child-specific safeguards.", "recommended_action": "Implement enhanced security for children's data: encryption, access logging, and restricted staff access.", "severity": "high", "confidence": 0.80, "matched_dpdp_text": "Rule 5: Implement encryption, access control, monitoring."},
+                {"obligation": "data_retention", "section_ref": "Section 8(7)", "status": "missing", "gap_description": "No retention policy. Student data may persist after they leave the platform.", "recommended_action": "Delete student data within 30 days of account closure or graduation. Implement annual retention review.", "severity": "high", "confidence": 0.82, "matched_dpdp_text": "Section 8(7): Erase data when purpose fulfilled."},
+            ],
+            "overall_risk_score": "high",
+            "compliance_percentage": 8,
+        },
+    }
+
+
+def _healthtech_demo() -> dict:
+    """MedConnect — Telemedicine app with health + biometric data."""
+    return {
+        "analysis_id": "demo-healthtech-001",
+        "status": "completed",
+        "result": {
+            "data_classifications": [
+                {"field_name": "patient_name", "categories": ["identifiers"], "risk_level": "medium", "reasoning": "Direct identifier", "confidence": 0.96},
+                {"field_name": "aadhaar", "categories": ["identifiers"], "risk_level": "high", "reasoning": "National identity number — highly sensitive", "confidence": 0.99},
+                {"field_name": "medical_history", "categories": ["health"], "risk_level": "high", "reasoning": "Sensitive health data under DPDP", "confidence": 0.98},
+                {"field_name": "prescription", "categories": ["health"], "risk_level": "high", "reasoning": "Medical prescription data", "confidence": 0.97},
+                {"field_name": "diagnosis", "categories": ["health"], "risk_level": "high", "reasoning": "Medical diagnosis — highly sensitive", "confidence": 0.98},
+                {"field_name": "fingerprint_hash", "categories": ["health"], "risk_level": "high", "reasoning": "Biometric data requires enhanced protection", "confidence": 0.97},
+                {"field_name": "face_id_token", "categories": ["health"], "risk_level": "high", "reasoning": "Biometric authentication data", "confidence": 0.96},
+                {"field_name": "insurance_policy", "categories": ["financial"], "risk_level": "high", "reasoning": "Financial insurance data", "confidence": 0.94},
+                {"field_name": "claim_amount", "categories": ["financial"], "risk_level": "high", "reasoning": "Financial transaction data", "confidence": 0.93},
+            ],
+            "applicable_obligations": [
+                {"category": "consent", "description": "Consent collection, notice, and withdrawal", "act_sections": ["Section 5", "Section 6"], "rules_refs": ["Rule 3"], "triggered_by": ["identifiers", "health", "financial"]},
+                {"category": "data_principal_rights", "description": "Access, correction, erasure rights", "act_sections": ["Section 11", "Section 12", "Section 13", "Section 14"], "rules_refs": ["Rule 7", "Rule 8"], "triggered_by": ["identifiers", "health"]},
+                {"category": "security_safeguards", "description": "Reasonable security safeguards", "act_sections": ["Section 8(4)"], "rules_refs": ["Rule 5"], "triggered_by": ["health", "financial"]},
+                {"category": "breach_notification", "description": "Notify Board and Data Principals", "act_sections": ["Section 8(6)"], "rules_refs": ["Rule 6"], "triggered_by": ["health", "financial"]},
+                {"category": "data_retention", "description": "Erase when purpose fulfilled", "act_sections": ["Section 8(7)"], "rules_refs": [], "triggered_by": ["health"]},
+                {"category": "significant_data_fiduciary", "description": "DPO, DPIA, audit obligations", "act_sections": ["Section 10"], "rules_refs": ["Rule 12"], "triggered_by": ["health", "financial"]},
+                {"category": "cross_border_transfer", "description": "Transfer restrictions", "act_sections": ["Section 16"], "rules_refs": ["Rule 14"], "triggered_by": ["international_operations"]},
+            ],
+            "gap_report": [
+                {"obligation": "consent", "section_ref": "Section 5, Section 6", "status": "partial", "gap_description": "Consent notice exists but does not specify each purpose for health vs financial data separately. Aadhaar usage consent is not explicit.", "recommended_action": "Create separate consent flows for medical data and financial/insurance data. Add explicit Aadhaar usage consent.", "severity": "critical", "confidence": 0.87, "matched_dpdp_text": "Section 6: Consent must be specific and limited to necessary data."},
+                {"obligation": "security_safeguards", "section_ref": "Section 8(4), Rule 5", "status": "partial", "gap_description": "Basic encryption mentioned but biometric data (fingerprint, face ID) safeguards not detailed. No mention of access logging.", "recommended_action": "Implement biometric-specific safeguards: hardware-backed storage, encrypted transmission, access audit trails. Document per Rule 5.", "severity": "critical", "confidence": 0.85, "matched_dpdp_text": "Rule 5: Encryption, access control, monitoring, and logging."},
+                {"obligation": "significant_data_fiduciary", "section_ref": "Section 10, Rule 12", "status": "missing", "gap_description": "Processing health and financial data at scale almost certainly qualifies as SDF. No DPO, no DPIA, no audit.", "recommended_action": "Appoint a DPO based in India. Conduct initial DPIA. Engage independent data auditor per Rule 12.", "severity": "critical", "confidence": 0.90, "matched_dpdp_text": "Section 10: SDF shall appoint DPO, conduct DPIA, appoint auditor."},
+                {"obligation": "breach_notification", "section_ref": "Section 8(6), Rule 6", "status": "missing", "gap_description": "No breach SOP. Health data breaches carry extreme severity.", "recommended_action": "Create breach response SOP with healthcare-specific severity escalation. Notify Board and patients per Rule 6.", "severity": "critical", "confidence": 0.91, "matched_dpdp_text": "Section 8(6): Notify Board and affected Data Principals."},
+                {"obligation": "data_retention", "section_ref": "Section 8(7)", "status": "partial", "gap_description": "Medical records retained 'as required by law' but no specific retention matrix or deletion schedule.", "recommended_action": "Create retention matrix: medical records per state health regulations, financial records per tax laws, biometrics deleted after purpose fulfilled.", "severity": "high", "confidence": 0.80, "matched_dpdp_text": "Section 8(7): Erase when purpose fulfilled or consent withdrawn."},
+                {"obligation": "cross_border_transfer", "section_ref": "Section 16, Rule 14", "status": "missing", "gap_description": "App uses cloud infrastructure but no mention of data residency or transfer restrictions.", "recommended_action": "Document where data is stored. If using AWS/Azure/GCP outside India, ensure compliance with Section 16 transfer rules.", "severity": "high", "confidence": 0.78, "matched_dpdp_text": "Section 16: Central Government may restrict transfer to certain countries."},
+                {"obligation": "data_principal_rights", "section_ref": "Section 11-14", "status": "partial", "gap_description": "Patient data access mentioned but no clear correction/erasure mechanism or grievance process.", "recommended_action": "Implement patient data portal with access, correction, and deletion features. Publish grievance officer contact per Section 13.", "severity": "high", "confidence": 0.83, "matched_dpdp_text": "Section 12: Data Principal may request correction or erasure."},
+            ],
+            "overall_risk_score": "high",
+            "compliance_percentage": 21,
+        },
+    }

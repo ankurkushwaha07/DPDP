@@ -1,0 +1,30 @@
+# DATA RETENTION MATRIX
+
+*Per Section 8(7) of the DPDP Act, 2023 - Data must be erased when the purpose is fulfilled or consent is withdrawn*
+
+**Organization:** {{ company_name }}
+**Date:** {{ current_date }}
+
+---
+
+| Data Category | Data Fields | Retention Period | Legal Basis | Deletion Trigger |
+|---------------|-------------|------------------|-------------|------------------|
+{% for category, fields in data_categories.items() %}
+| {{ category | replace("_", " ") | title }} | {{ fields | map(attribute='field_name') | join(', ') }} | {{ retention_periods.get(category, '12 months or until purpose fulfilled') }} | {{ legal_bases.get(category, 'Consent (Section 6)') }} | {{ deletion_triggers.get(category, 'Purpose fulfilled / Consent withdrawn / Account deletion') }} |
+{% endfor %}
+
+---
+
+## Retention Principles
+
+1. **Purpose Limitation** (Section 4): Data is retained only for the stated purpose.
+2. **Erasure Obligation** (Section 8(7)): Data is erased when:
+   - The purpose for which it was collected has been fulfilled
+   - The Data Principal withdraws consent
+   - The Data Principal requests erasure under Section 12
+3. **Periodic Review**: Retention periods are reviewed annually.
+4. **Secure Deletion**: Erasure includes permanent deletion from all systems, backups, and logs within 30 days.
+
+---
+
+*This matrix should be reviewed by legal counsel and updated when data processing activities change.*

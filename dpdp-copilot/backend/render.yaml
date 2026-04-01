@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: dpdp-copilot-api
+    runtime: python
+    region: singapore
+    plan: free
+    buildCommand: |
+      pip install -r requirements.txt
+      python -m app.knowledge.ingest --rebuild
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
+      - key: DB_PATH
+        value: data/copilot.db
+      - key: CHROMA_DIR
+        value: data/chroma_db
+      - key: LOG_LEVEL
+        value: INFO
+    disk:
+      name: dpdp-data
+      mountPath: /app/data
+      sizeGB: 1

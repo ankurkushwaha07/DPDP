@@ -1,0 +1,255 @@
+"""
+Hardcoded DPDP Act 2023 + DPDP Rules 2025 section mapping.
+
+This is the AUTHORITATIVE reference for legal citations.
+RAG results are cross-checked against this mapping.
+If RAG returns a section not in this map, it is flagged as unverified.
+
+Source: Official Gazette of India, MeitY publications.
+"""
+
+# ============================================================
+# OBLIGATION CATEGORIES
+# ============================================================
+
+OBLIGATION_CATEGORIES = {
+    "consent": {
+        "act_sections": ["Section 5", "Section 6"],
+        "rules_refs": ["Rule 3", "Rule 4"],
+        "description": "Consent collection, notice, and withdrawal",
+    },
+    "purpose_limitation": {
+        "act_sections": ["Section 4", "Section 7"],
+        "rules_refs": [],
+        "description": "Processing only for stated lawful purposes",
+    },
+    "children_data": {
+        "act_sections": ["Section 9"],
+        "rules_refs": ["Rule 10"],
+        "description": "Verifiable parental consent for minors under 18; no behavioral tracking of children",
+    },
+    "data_principal_rights": {
+        "act_sections": ["Section 11", "Section 12", "Section 13", "Section 14"],
+        "rules_refs": ["Rule 7", "Rule 8"],
+        "description": "Access, correction, erasure, grievance redressal, nomination rights",
+    },
+    "data_retention": {
+        "act_sections": ["Section 8(7)"],
+        "rules_refs": [],
+        "description": "Erase data when purpose is fulfilled or consent is withdrawn",
+    },
+    "breach_notification": {
+        "act_sections": ["Section 8(6)"],
+        "rules_refs": ["Rule 6"],
+        "description": "Notify Data Protection Board and affected Data Principals of breaches",
+    },
+    "cross_border_transfer": {
+        "act_sections": ["Section 16"],
+        "rules_refs": ["Rule 14"],
+        "description": "Transfer restrictions to countries on negative list",
+    },
+    "significant_data_fiduciary": {
+        "act_sections": ["Section 10"],
+        "rules_refs": ["Rule 12"],
+        "description": "DPO appointment, DPIA, independent audit obligations",
+    },
+    "security_safeguards": {
+        "act_sections": ["Section 8(4)"],
+        "rules_refs": ["Rule 5"],
+        "description": "Reasonable security safeguards including encryption and access control",
+    },
+    "consent_manager": {
+        "act_sections": ["Section 7(9)"],
+        "rules_refs": ["Rule 4"],
+        "description": "Registered consent manager as single point of contact",
+    },
+}
+
+
+# ============================================================
+# DPDP ACT 2023 — SECTION DETAILS
+# ============================================================
+
+DPDP_SECTIONS = {
+    "Section 4": {
+        "title": "Grounds for processing personal data",
+        "summary": "Personal data may be processed only for a lawful purpose for which the Data Principal has given consent, or for certain legitimate uses.",
+        "obligations": ["consent", "purpose_limitation"],
+        "penalties": "Up to ₹250 crore",
+    },
+    "Section 5": {
+        "title": "Notice",
+        "summary": "Data Fiduciary shall give notice to the Data Principal describing the personal data being collected and the purpose of processing, before or at the time of collection.",
+        "obligations": ["consent"],
+        "penalties": "Up to ₹200 crore",
+    },
+    "Section 6": {
+        "title": "Consent",
+        "summary": "Consent must be free, specific, informed, unconditional, and unambiguous, with a clear affirmative action. Consent must be limited to personal data necessary for the specified purpose. Data Principal may withdraw consent at any time.",
+        "obligations": ["consent"],
+        "penalties": "Up to ₹200 crore",
+    },
+    "Section 7": {
+        "title": "Certain legitimate uses",
+        "summary": "Processing is permitted without consent for: voluntary provision for specified purpose, State functions, legal obligations, medical emergencies, employment purposes, and public interest.",
+        "obligations": ["purpose_limitation"],
+        "penalties": "N/A",
+    },
+    "Section 8": {
+        "title": "General obligations of Data Fiduciary",
+        "summary": "Ensure completeness, accuracy, and consistency of personal data. Implement reasonable security safeguards. Erase personal data when purpose is fulfilled or consent is withdrawn. Publish contact details of Data Protection Officer. Notify Board and affected Data Principals of any personal data breach.",
+        "obligations": ["security_safeguards", "data_retention", "breach_notification"],
+        "penalties": "Up to ₹250 crore",
+    },
+    "Section 9": {
+        "title": "Processing of personal data of children",
+        "summary": "Obtain verifiable consent of parent or lawful guardian before processing personal data of persons under 18. Do not process data in a manner that is detrimental to the well-being of a child. No tracking, behavioral monitoring, or targeted advertising directed at children.",
+        "obligations": ["children_data"],
+        "penalties": "Up to ₹200 crore",
+    },
+    "Section 10": {
+        "title": "Additional obligations of Significant Data Fiduciary",
+        "summary": "Appoint a Data Protection Officer based in India. Appoint an independent data auditor. Conduct periodic Data Protection Impact Assessment. Implement such other measures as may be prescribed.",
+        "obligations": ["significant_data_fiduciary"],
+        "penalties": "Up to ₹150 crore",
+    },
+    "Section 11": {
+        "title": "Right to access information about personal data",
+        "summary": "Data Principal has the right to obtain from the Data Fiduciary a summary of the personal data being processed and the processing activities undertaken.",
+        "obligations": ["data_principal_rights"],
+        "penalties": "Up to ₹200 crore",
+    },
+    "Section 12": {
+        "title": "Right to correction and erasure of personal data",
+        "summary": "Data Principal may request the Data Fiduciary to correct inaccurate or misleading personal data, complete incomplete personal data, update personal data, or erase personal data no longer necessary for the purpose for which it was processed.",
+        "obligations": ["data_principal_rights"],
+        "penalties": "Up to ₹200 crore",
+    },
+    "Section 13": {
+        "title": "Right of grievance redressal",
+        "summary": "Data Principal may register a grievance with the Data Fiduciary. The Data Fiduciary must respond within the period prescribed under the Rules. If unsatisfied, the Data Principal may complain to the Data Protection Board.",
+        "obligations": ["data_principal_rights"],
+        "penalties": "Up to ₹200 crore",
+    },
+    "Section 14": {
+        "title": "Right to nominate",
+        "summary": "Data Principal may nominate any other individual who shall exercise the rights of the Data Principal in the event of death or incapacity of the Data Principal.",
+        "obligations": ["data_principal_rights"],
+        "penalties": "N/A",
+    },
+    "Section 16": {
+        "title": "Transfer of personal data outside India",
+        "summary": "The Central Government may, by notification, restrict the transfer of personal data to such country or territory outside India as it may specify. Countries not on the restricted list are permitted.",
+        "obligations": ["cross_border_transfer"],
+        "penalties": "Up to ₹250 crore",
+    },
+}
+
+
+# ============================================================
+# DPDP RULES 2025 — RULE DETAILS
+# ============================================================
+
+DPDP_RULES = {
+    "Rule 3": {
+        "title": "Consent notice requirements",
+        "summary": "Data Fiduciary must issue a separate consent notice that is clear and easy to understand. Must explain the specific purpose of processing. Retrospective notice required for personal data processed before the Act came into force.",
+        "obligations": ["consent"],
+    },
+    "Rule 4": {
+        "title": "Consent Manager",
+        "summary": "Consent Manager must be registered with the Data Protection Board. Acts as a single point of contact for Data Principals to manage their consent. Must meet operational and technical standards.",
+        "obligations": ["consent_manager", "consent"],
+    },
+    "Rule 5": {
+        "title": "Reasonable security safeguards",
+        "summary": "Data Fiduciary must implement encryption, access control, data backup, monitoring, and logging mechanisms to protect personal data against breaches, unauthorized access, and accidental loss.",
+        "obligations": ["security_safeguards"],
+    },
+    "Rule 6": {
+        "title": "Personal data breach notification",
+        "summary": "Data Fiduciary must notify the Data Protection Board and each affected Data Principal of any personal data breach. Notification must include the nature of the breach, categories of data affected, likely consequences, and measures taken or proposed.",
+        "obligations": ["breach_notification"],
+    },
+    "Rule 7": {
+        "title": "Data Principal rights — procedures",
+        "summary": "Specifies the procedures by which Data Principals may exercise their rights to access, correction, and erasure of personal data. Data Fiduciary must provide accessible mechanisms.",
+        "obligations": ["data_principal_rights"],
+    },
+    "Rule 8": {
+        "title": "Grievance redressal",
+        "summary": "Specifies response timelines and procedures for addressing Data Principal complaints. Data Fiduciary must acknowledge receipt and provide resolution within the prescribed period.",
+        "obligations": ["data_principal_rights"],
+    },
+    "Rule 10": {
+        "title": "Children and persons with disability",
+        "summary": "Specifies procedures for obtaining verifiable parental or guardian consent. Exemptions for processing related to healthcare, education, and email account creation for children.",
+        "obligations": ["children_data"],
+    },
+    "Rule 12": {
+        "title": "Significant Data Fiduciary obligations",
+        "summary": "Specifies requirements for DPO appointment, Data Protection Impact Assessment methodology, independent audit standards, and periodic compliance reporting.",
+        "obligations": ["significant_data_fiduciary"],
+    },
+    "Rule 14": {
+        "title": "Cross-border data transfer",
+        "summary": "Specifies the restrictions and procedural requirements for transferring personal data outside India. Lists conditions under which transfer is permitted or restricted.",
+        "obligations": ["cross_border_transfer"],
+    },
+}
+
+
+# ============================================================
+# PERSONAL DATA CLASSIFICATION CATEGORIES
+# ============================================================
+
+DATA_CATEGORIES = {
+    "identifiers": ["name", "email", "phone", "address", "aadhaar", "pan", "passport"],
+    "financial": ["bank_account", "upi_id", "credit_card", "income", "transaction"],
+    "health": ["medical_records", "prescriptions", "health_conditions", "biometric"],
+    "children": ["minor_age", "school", "parental_info", "child_preferences"],
+    "sensitive": ["caste", "religion", "political_opinion", "sexual_orientation", "genetic"],
+    "behavioral": ["browsing_history", "purchase_history", "location_tracking", "app_usage"],
+    "communication": ["chat_logs", "call_records", "email_content"],
+}
+
+
+# ============================================================
+# LOOKUP FUNCTIONS
+# ============================================================
+
+def get_sections_for_obligation(obligation_category: str) -> list[dict]:
+    """
+    Get all Act sections and Rules relevant to a specific obligation category.
+
+    Args:
+        obligation_category: One of the keys in OBLIGATION_CATEGORIES
+
+    Returns:
+        List of dicts with ref, type ("act"/"rule"), title, summary, penalties
+    """
+    sections = []
+    for ref, data in DPDP_SECTIONS.items():
+        if obligation_category in data["obligations"]:
+            sections.append({"ref": ref, "type": "act", **data})
+    for ref, data in DPDP_RULES.items():
+        if obligation_category in data["obligations"]:
+            sections.append({"ref": ref, "type": "rule", **data})
+    return sections
+
+
+def validate_section_ref(ref: str) -> bool:
+    """Check if a section or rule reference is valid (exists in our map)."""
+    return ref in DPDP_SECTIONS or ref in DPDP_RULES
+
+
+def get_all_obligation_categories() -> list[str]:
+    """Return all valid obligation category names."""
+    return list(OBLIGATION_CATEGORIES.keys())
+
+
+def get_penalty_for_section(ref: str) -> str:
+    """Get the penalty string for a given section reference."""
+    if ref in DPDP_SECTIONS:
+        return DPDP_SECTIONS[ref].get("penalties", "Not specified")
+    return "Not specified"

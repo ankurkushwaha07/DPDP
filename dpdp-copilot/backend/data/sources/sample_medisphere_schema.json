@@ -1,0 +1,46 @@
+{
+  "patients": [
+    "patient_id",
+    "full_name",
+    "email",
+    "phone_number",
+    "date_of_birth",
+    "gender",
+    "address"
+  ],
+  "clinical_records": [
+    "medical_history",
+    "diagnosis_codes",
+    "lab_report_summary",
+    "prescription_details",
+    "allergy_information",
+    "doctor_notes"
+  ],
+  "teleconsultation": [
+    "consultation_id",
+    "appointment_datetime",
+    "video_session_metadata",
+    "chat_transcript",
+    "symptom_description"
+  ],
+  "insurance_and_billing": [
+    "insurance_provider",
+    "policy_number",
+    "claim_id",
+    "billing_address",
+    "payment_transaction_id"
+  ],
+  "device_and_security": [
+    "device_id",
+    "ip_address",
+    "login_timestamps",
+    "mfa_phone_number",
+    "audit_log_reference"
+  ],
+  "sensitive_identifiers": [
+    "aadhaar_number",
+    "biometric_auth_token",
+    "emergency_contact_name",
+    "emergency_contact_phone"
+  ]
+}

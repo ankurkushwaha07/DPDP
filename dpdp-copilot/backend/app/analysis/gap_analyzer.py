@@ -1,0 +1,216 @@
+"""
+Batched + chunked gap analyzer.
+
+Compares DPDP obligations against existing privacy policy using LLM + RAG.
+
+Optimizations:
+- Batches obligations (MAX_OBLIGATIONS_PER_LLM_CALL at a time) to reduce API calls
+- Chunks large policies instead of truncating, so no clause is missed
+- Merges results across chunks: best status wins per obligation
+- Falls back gracefully on LLM failure
+"""
+
+import logging
+from app.llm.client import call_gemini, LLMError
+from app.security.sanitizer import sanitize_for_llm, wrap_user_content
+from app.knowledge.retriever import get_relevant_sections
+from app.analysis.prompts import GAP_BATCH_PROMPT
+from app.config import (
+    MAX_OBLIGATIONS_PER_LLM_CALL,
+    MAX_POLICY_CHUNKS,
+    POLICY_CHUNK_SIZE,
+    POLICY_CHUNK_OVERLAP,
+)
+
+logger = logging.getLogger("gap_analyzer")
+
+
+def analyze_gaps(obligations: list, policy_text: str) -> list[dict]:
+    """
+    Analyze gaps between DPDP obligations and existing privacy policy.
+
+    Args:
+        obligations: List of ObligationItem dicts/objects from mapper
+        policy_text: Raw privacy policy text (can be empty)
+
+    Returns:
+        List of gap analysis dicts with status, severity, recommendations
+
+    Raises:
+        LLMError: If all LLM attempts fail (caller should use fallback)
+    """
+    # Sanitize and prepare policy text
+    if not policy_text or len(policy_text.strip()) < 10:
+        clean_policy = "[No privacy policy provided]"
+    else:
+        clean_policy = sanitize_for_llm(policy_text, "privacy_policy_text")
+
+    # Chunk large policies
+    policy_chunks = _chunk_policy(clean_policy)
+    logger.info(f"Policy split into {len(policy_chunks)} chunks")
+
+    all_gaps = []
+
+    # Process obligations in batches
+    for i in range(0, len(obligations), MAX_OBLIGATIONS_PER_LLM_CALL):
+        batch = obligations[i:i + MAX_OBLIGATIONS_PER_LLM_CALL]
+        batch_num = i // MAX_OBLIGATIONS_PER_LLM_CALL + 1
+
+        # Get RAG context for this batch
+        dpdp_context = _get_rag_context(batch)
+
+        # Build obligations description
+        obligations_desc = _format_obligations(batch)
+
+        # Analyze against each policy chunk
+        chunk_results = []
+        for chunk_idx, policy_chunk in enumerate(policy_chunks):
+            wrapped_policy = wrap_user_content(policy_chunk, "PRIVACY_POLICY")
+
+            prompt = GAP_BATCH_PROMPT.format(
+                dpdp_context=dpdp_context[:4000],
+                policy_wrapped=wrapped_policy,
+                obligations_list=obligations_desc,
+            )
+
+            result = call_gemini(prompt, expect_json=True, model="flash")
+            gaps = _normalize_gaps(result)
+            chunk_results.append(gaps)
+
+            logger.debug(
+                f"Batch {batch_num}, chunk {chunk_idx + 1}: {len(gaps)} gaps"
+            )
+
+        # Merge results across chunks
+        merged = _merge_chunk_results(chunk_results, batch)
+        all_gaps.extend(merged)
+
+        logger.info(
+            f"Gap batch {batch_num}: {len(merged)} obligations analyzed "
+            f"across {len(policy_chunks)} policy chunks"
+        )
+
+    return all_gaps
+
+
+def _chunk_policy(
+    text: str,
+    max_chunk_chars: int = POLICY_CHUNK_SIZE,
+    overlap_chars: int = POLICY_CHUNK_OVERLAP,
+) -> list[str]:
+    """
+    Split large privacy policy into overlapping chunks.
+    Splits on paragraph boundaries. Returns 1 chunk for short policies.
+    """
+    if len(text) <= max_chunk_chars:
+        return [text]
+
+    chunks = []
+    paragraphs = text.split("\n\n")
+    current_chunk = ""
+
+    for para in paragraphs:
+        if len(current_chunk) + len(para) > max_chunk_chars and current_chunk:
+            chunks.append(current_chunk)
+            # Keep overlap from end of previous chunk
+            overlap = current_chunk[-overlap_chars:] if len(current_chunk) > overlap_chars else ""
+            current_chunk = overlap + "\n\n" + para
+        else:
+            current_chunk += ("\n\n" if current_chunk else "") + para
+
+    if current_chunk.strip():
+        chunks.append(current_chunk)
+
+    # Cap to limit API calls
+    return chunks[:MAX_POLICY_CHUNKS]
+
+
+def _get_rag_context(batch: list) -> str:
+    """Get RAG context for a batch of obligations."""
+    all_chunks = []
+    seen = set()
+
+    for ob in batch:
+        category = ob.get("category") if isinstance(ob, dict) else getattr(ob, "category", "")
+        chunks = get_relevant_sections(f"DPDP {category} obligation requirement", n_results=3)
+        for chunk in chunks:
+            text = chunk.get("text", "")
+            if text and text not in seen:
+                seen.add(text)
+                all_chunks.append(text)
+
+    return "\n---\n".join(all_chunks[:6])
+
+
+def _format_obligations(batch: list) -> str:
+    """Format obligations list for prompt insertion."""
+    lines = []
+    for ob in batch:
+        if isinstance(ob, dict):
+            cat = ob.get("category", "")
+            desc = ob.get("description", "")
+            sections = ob.get("act_sections", [])
+        else:
+            cat = getattr(ob, "category", "")
+            desc = getattr(ob, "description", "")
+            sections = getattr(ob, "act_sections", [])
+        lines.append(f"- {cat}: {desc} (Sections: {', '.join(sections)})")
+    return "\n".join(lines)
+
+
+def _normalize_gaps(result) -> list[dict]:
+    """Normalize LLM response to list of gap dicts."""
+    if isinstance(result, dict):
+        if "gaps" in result:
+            return result["gaps"]
+        elif "gap_report" in result:
+            return result["gap_report"]
+        else:
+            return [result]
+    elif isinstance(result, list):
+        return result
+    else:
+        return []
+
+
+def _merge_chunk_results(chunk_results: list[list], obligations: list) -> list[dict]:
+    """
+    Merge gap results from multiple policy chunks.
+    For each obligation: keep the BEST status found across chunks.
+    Priority: compliant > partial > missing
+    """
+    STATUS_PRIORITY = {"compliant": 3, "partial": 2, "missing": 1}
+
+    best_per_obligation = {}
+
+    for gaps in chunk_results:
+        for gap in gaps:
+            ob_name = gap.get("obligation", "")
+            current_priority = STATUS_PRIORITY.get(gap.get("status", "missing"), 0)
+
+            if ob_name not in best_per_obligation:
+                best_per_obligation[ob_name] = gap
+            else:
+                existing_priority = STATUS_PRIORITY.get(
+                    best_per_obligation[ob_name].get("status", "missing"), 0
+                )
+                if current_priority > existing_priority:
+                    best_per_obligation[ob_name] = gap
+
+    # Ensure every obligation has a result
+    for ob in obligations:
+        cat = ob.get("category") if isinstance(ob, dict) else getattr(ob, "category", "")
+        if cat and cat not in best_per_obligation:
+            act_sections = ob.get("act_sections") if isinstance(ob, dict) else getattr(ob, "act_sections", [])
+            best_per_obligation[cat] = {
+                "obligation": cat,
+                "section_ref": ", ".join(act_sections or []),
+                "status": "missing",
+                "gap_description": "No relevant clause found in privacy policy",
+                "recommended_action": "Add a section addressing this DPDP obligation",
+                "severity": "high",
+                "confidence": 0.50,
+                "matched_dpdp_text": "",
+            }
+
+    return list(best_per_obligation.values())

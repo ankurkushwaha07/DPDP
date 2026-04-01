@@ -1,0 +1,43 @@
+# CONSENT COLLECTION TEXTS
+
+*Per Section 6 of the DPDP Act, 2023 - Consent must be free, specific, informed, unconditional, and unambiguous*
+
+---
+
+## Version 1: Website Cookie/Data-Use Banner
+
+{{ company_name }} collects and processes your personal data ({{ data_fields_summary }}) to {{ primary_purpose }}. By continuing, you consent to this processing under the DPDP Act, 2023. You may withdraw consent at any time by contacting {{ contact_email }}. [Manage Preferences] [Accept] [Decline]
+
+---
+
+## Version 2: Consent Modal/Popup
+
+**{{ company_name }} - Data Collection Notice**
+
+We collect the following personal data: {{ data_fields_summary }}.
+
+**Why we collect this data:**
+{% for purpose in purposes %}
+- {{ purpose }}
+{% endfor %}
+
+Your consent is required under Section 6 of the Digital Personal Data Protection Act, 2023. You have the right to:
+- **Withdraw consent** at any time
+- **Access, correct, or delete** your data
+- **File a grievance** with our Data Protection Officer
+
+Contact: {{ contact_email }}
+
+[ ] I consent to the collection and processing of my personal data for the stated purposes.
+
+[Accept] [Decline]
+
+---
+
+## Version 3: Form Checkbox Text
+
+[ ] I consent to {{ company_name }} collecting and processing my personal data ({{ data_fields_summary }}) for {{ primary_purpose }}, as described in the Privacy Notice. I understand I can withdraw consent anytime per Section 6, DPDP Act 2023.
+
+---
+
+*Note: These texts should be adapted to your specific UI/UX. Ensure the consent mechanism records a clear affirmative action (checkbox click, button press) per Section 6 requirements.*

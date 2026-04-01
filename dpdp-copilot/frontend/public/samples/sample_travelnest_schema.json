@@ -1,0 +1,50 @@
+{
+  "users": [
+    "full_name",
+    "email",
+    "phone_number",
+    "date_of_birth",
+    "nationality",
+    "passport_number"
+  ],
+  "identity_verification": [
+    "government_id_type",
+    "government_id_number",
+    "selfie_image",
+    "face_match_score"
+  ],
+  "bookings": [
+    "departure_city",
+    "destination_city",
+    "travel_dates",
+    "hotel_preferences",
+    "special_assistance_request"
+  ],
+  "payments": [
+    "card_last4",
+    "card_network",
+    "upi_id",
+    "billing_address",
+    "transaction_id",
+    "refund_account_reference"
+  ],
+  "location_and_device": [
+    "device_id",
+    "ip_address",
+    "gps_location",
+    "app_session_id",
+    "device_language"
+  ],
+  "communications_and_support": [
+    "chat_messages",
+    "support_call_recording_flag",
+    "email_content",
+    "notification_preferences"
+  ],
+  "loyalty_and_marketing": [
+    "loyalty_tier",
+    "reward_points_balance",
+    "coupon_usage_history",
+    "browsing_history"
+  ]
+}

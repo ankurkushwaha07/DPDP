@@ -1,0 +1,19 @@
+# Node
+node_modules/
+.next/
+
+# Python
+.venv311/
+venv/
+__pycache__/
+*.pyc
+
+# Environment variables
+.env
+.env.local
+
+# Databases and Local Data
+data/copilot.db
+data/uploads/
+data/generated/
+data/chroma_db/
