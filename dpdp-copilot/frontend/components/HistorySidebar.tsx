@@ -10,9 +10,9 @@ interface HistorySidebarProps {
 }
 
 const RISK_BADGE: Record<HistoryItem["risk_score"], string> = {
-  high: "bg-red-100 text-red-700",
-  medium: "bg-yellow-100 text-yellow-700",
-  low: "bg-green-100 text-green-700",
+  high: "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400",
+  medium: "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400",
+  low: "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400",
 };
 
 export default function HistorySidebar({
@@ -61,8 +61,8 @@ export default function HistorySidebar({
             onClick={() => onSelectAnalysis(item.analysis_id)}
             className={`w-full text-left p-3 rounded-lg border transition-colors text-sm ${
               currentAnalysisId === item.analysis_id
-                ? "border-teal-300 bg-teal-50"
-                : "border-gray-200 hover:border-teal-200 hover:bg-gray-50"
+                ? "border-teal-300 dark:border-teal-700 bg-teal-50 dark:bg-teal-900/20"
+                : "border-gray-200 dark:border-gray-800 hover:border-teal-200 dark:hover:border-teal-700 hover:bg-gray-50 dark:hover:bg-gray-800"
             }`}
           >
             <div className="flex items-center justify-between mb-1">

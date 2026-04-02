@@ -6,6 +6,8 @@ import { getDownloadUrl } from "@/lib/api";
 interface StepDocumentsProps {
   documents: DocumentItem[];
   onRestart: () => void;
+  isHistoryView?: boolean;
+  onBackToResults?: () => void;
 }
 
 const DOC_INFO: Record<
@@ -39,11 +41,11 @@ const DOC_INFO: Record<
   },
 };
 
-export default function StepDocuments({ documents, onRestart }: StepDocumentsProps) {
+export default function StepDocuments({ documents, onRestart, isHistoryView, onBackToResults }: StepDocumentsProps) {
   return (
     <div className="space-y-6">
-      <h2 className="text-xl font-bold">Step 3: Your Compliance Documents</h2>
-      <p className="text-sm text-gray-600">
+      <h2 className="text-xl font-bold dark:text-gray-100">Step 3: Your Compliance Documents</h2>
+      <p className="text-sm text-gray-600 dark:text-gray-400">
         Download your DPDP-compliant documents. Each document cites specific Act
         sections and Rules. Review with legal counsel before publishing.
       </p>
@@ -60,20 +62,20 @@ export default function StepDocuments({ documents, onRestart }: StepDocumentsPro
           return (
             <div
               key={doc.doc_type}
-              className="bg-white border border-gray-200 rounded-xl p-5 flex flex-col"
+              className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5 flex flex-col transition-colors"
             >
               <div className="flex items-start gap-3 mb-3">
-                <span className="text-xs font-semibold bg-gray-100 rounded px-2 py-1">
+                <span className="text-xs font-semibold bg-gray-100 dark:bg-gray-800 dark:text-gray-200 rounded px-2 py-1">
                   {info.icon}
                 </span>
                 <div>
-                  <h3 className="font-semibold">{info.title}</h3>
-                  <p className="text-xs text-gray-500">{info.description}</p>
+                  <h3 className="font-semibold dark:text-gray-100">{info.title}</h3>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{info.description}</p>
                 </div>
               </div>
 
-              <div className="flex-1 bg-gray-50 rounded-lg p-3 mb-4 max-h-40 overflow-y-auto">
-                <pre className="text-xs text-gray-600 whitespace-pre-wrap font-sans">
+              <div className="flex-1 bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3 mb-4 max-h-40 overflow-y-auto">
+                <pre className="text-xs text-gray-600 dark:text-gray-400 whitespace-pre-wrap font-sans">
                   {doc.markdown_preview.slice(0, 500)}
                   {doc.markdown_preview.length > 500 && "..."}
                 </pre>
@@ -90,7 +92,7 @@ export default function StepDocuments({ documents, onRestart }: StepDocumentsPro
               ) : (
                 <button
                   disabled
-                  className="block w-full text-center py-2 bg-gray-200 text-gray-500 text-sm rounded-lg cursor-not-allowed"
+                  className="block w-full text-center py-2 bg-gray-200 dark:bg-gray-800 text-gray-500 dark:text-gray-400 text-sm rounded-lg cursor-not-allowed transition-colors"
                 >
                   Preview Only
                 </button>
@@ -101,12 +103,21 @@ export default function StepDocuments({ documents, onRestart }: StepDocumentsPro
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3 pt-4">
-        <button
-          onClick={onRestart}
-          className="flex-1 py-3 border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium rounded-lg transition-colors"
-        >
-          {"<-"} Analyze Another Product
-        </button>
+        {isHistoryView && onBackToResults ? (
+          <button
+            onClick={onBackToResults}
+            className="flex-1 py-3 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 font-medium rounded-lg transition-colors"
+          >
+            {"<-"} Back to Analysis Results
+          </button>
+        ) : (
+          <button
+            onClick={onRestart}
+            className="flex-1 py-3 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 font-medium rounded-lg transition-colors"
+          >
+            {"<-"} Analyze Another Product
+          </button>
+        )}
       </div>
     </div>
   );

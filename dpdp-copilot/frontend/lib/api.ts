@@ -61,6 +61,8 @@ export interface StatusResponse {
   progress_percent?: number;
   result?: AnalysisResult;
   error?: string;
+  inputs?: AnalyzeRequestBody;
+  documents?: DocumentItem[];
 }
 
 export interface DocumentItem {
@@ -138,6 +140,16 @@ export async function pollAnalysis(
   }
 
   throw new Error("Analysis timed out. Please try again.");
+}
+
+export async function getAnalysisDetails(analysisId: string): Promise<StatusResponse> {
+  const res = await fetch(`${API_BASE}/api/analyze/${analysisId}/status`, {
+    credentials: "include",
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to load analysis: ${res.status}`);
+  }
+  return res.json();
 }
 
 export async function generateDocuments(

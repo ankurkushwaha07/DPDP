@@ -79,20 +79,20 @@ export default function HomePage() {
           {FEATURES.map((f) => (
             <div
               key={f.title}
-              className="bg-white rounded-xl p-6 shadow-sm border border-gray-100"
+              className="bg-white dark:bg-gray-900 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-800"
             >
               <div className="text-3xl mb-3">{f.icon}</div>
-              <h3 className="font-semibold text-lg mb-2">{f.title}</h3>
-              <p className="text-gray-600 text-sm">{f.description}</p>
+              <h3 className="font-semibold text-lg mb-2 dark:text-gray-100">{f.title}</h3>
+              <p className="text-gray-600 dark:text-gray-400 text-sm">{f.description}</p>
             </div>
           ))}
         </div>
       </section>
 
-      <section className="bg-gray-100 px-6 py-16">
+      <section className="bg-gray-100 dark:bg-gray-900/50 px-6 py-16 transition-colors">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-2xl font-bold text-center mb-3">Try a Demo</h2>
-          <p className="text-center text-gray-600 mb-10">
+          <h2 className="text-2xl font-bold text-center mb-3 dark:text-gray-100">Try a Demo</h2>
+          <p className="text-center text-gray-600 dark:text-gray-400 mb-10">
             See instant results - no sign-up, no API key needed
           </p>
           <div className="grid md:grid-cols-3 gap-6">
@@ -100,12 +100,12 @@ export default function HomePage() {
               <button
                 key={demo.id}
                 onClick={() => router.push(`/analyze?demo=${demo.id}`)}
-                className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:border-teal-300 hover:shadow-md transition-all text-left"
+                className="bg-white dark:bg-gray-900 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-800 hover:border-teal-300 dark:hover:border-teal-700 hover:shadow-md transition-all text-left"
               >
                 <div className="text-3xl mb-3">{demo.emoji}</div>
-                <h3 className="font-semibold text-lg mb-1">{demo.title}</h3>
-                <p className="text-gray-600 text-sm mb-3">{demo.description}</p>
-                <span className="inline-block px-2 py-1 bg-red-50 text-red-700 text-xs font-medium rounded">
+                <h3 className="font-semibold text-lg mb-1 dark:text-gray-100">{demo.title}</h3>
+                <p className="text-gray-600 dark:text-gray-400 text-sm mb-3">{demo.description}</p>
+                <span className="inline-block px-2 py-1 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 text-xs font-medium rounded">
                   Risk: {demo.risk.toUpperCase()}
                 </span>
               </button>

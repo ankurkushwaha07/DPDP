@@ -8,6 +8,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# === Environment ===
+ENVIRONMENT = os.getenv("ENVIRONMENT", "production")
+
 # === File Upload Limits ===
 MAX_FILE_SIZE_MB = 5
 MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024

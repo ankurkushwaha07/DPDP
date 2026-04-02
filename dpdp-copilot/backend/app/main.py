@@ -32,7 +32,7 @@ from app.db.database import init_db, get_db
 from app.analysis.pipeline import run_analysis_pipeline
 from app.config import (
     MAX_ANALYSES_PER_IP_PER_HOUR, FRONTEND_URL, LOG_LEVEL, LOG_DIR,
-    SESSION_COOKIE_NAME, SESSION_COOKIE_MAX_AGE,
+    SESSION_COOKIE_NAME, SESSION_COOKIE_MAX_AGE, ENVIRONMENT,
 )
 
 # === Logging Setup ===
@@ -198,6 +198,35 @@ async def get_status(analysis_id: str):
             "overall_risk_score": row["overall_risk_score"],
             "compliance_percentage": row["compliance_percentage"],
         }
+        
+        response["inputs"] = {
+            "product_description": row["product_description"],
+            "schema_text": row["input_schema"],
+            "privacy_policy_text": row["privacy_policy_text"],
+            "company_details": {
+                "name": row["company_name"] or "",
+                "contact_email": row["company_email"] or "",
+                "dpo_name": row["dpo_name"] or "",
+                "grievance_email": row["grievance_email"] or "",
+            }
+        }
+        
+        with get_db() as conn:
+            docs = conn.execute(
+                "SELECT id, doc_type, markdown_content FROM documents WHERE analysis_id = ?",
+                (analysis_id,)
+            ).fetchall()
+            
+        if docs:
+            response["documents"] = [
+                {
+                    "doc_type": d["doc_type"],
+                    "markdown_preview": d["markdown_content"],
+                    "download_url": f"/api/download/{d['id']}"
+                }
+                for d in docs
+            ]
+            
     elif status == "failed":
         response["error"] = row["error_message"] or "Analysis failed. Please try again."
     elif status == "processing":
@@ -224,21 +253,32 @@ async def health():
 
 @app.get("/api/history")
 async def get_history(request: Request):
-    """Return past analyses for this session."""
-    session_id = request.cookies.get(SESSION_COOKIE_NAME)
-    if not session_id:
-        return HistoryResponse(analyses=[])
+    """Return all past analyses (demo mode: bypass session if local)."""
+    if ENVIRONMENT == "local":
+        with get_db() as conn:
+            rows = conn.execute(
+                """SELECT id, company_name, overall_risk_score, compliance_percentage,
+                          version, status, created_at
+                   FROM analyses
+                   WHERE status = 'completed'
+                   ORDER BY created_at DESC
+                   LIMIT 50"""
+            ).fetchall()
+    else:
+        session_id = request.cookies.get(SESSION_COOKIE_NAME)
+        if not session_id:
+            return HistoryResponse(analyses=[])
 
-    with get_db() as conn:
-        rows = conn.execute(
-            """SELECT id, company_name, overall_risk_score, compliance_percentage,
-                      version, status, created_at
-               FROM analyses
-               WHERE session_id = ? AND status = 'completed'
-               ORDER BY created_at DESC
-               LIMIT 20""",
-            (session_id,),
-        ).fetchall()
+        with get_db() as conn:
+            rows = conn.execute(
+                """SELECT id, company_name, overall_risk_score, compliance_percentage,
+                          version, status, created_at
+                   FROM analyses
+                   WHERE session_id = ? AND status = 'completed'
+                   ORDER BY created_at DESC
+                   LIMIT 20""",
+                (session_id,),
+            ).fetchall()
 
     analyses = [
         HistoryItem(

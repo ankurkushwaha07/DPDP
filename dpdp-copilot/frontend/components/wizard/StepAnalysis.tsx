@@ -7,34 +7,40 @@ interface StepAnalysisProps {
   result: AnalysisResult;
   onGenerateDocs: () => void;
   isGenerating: boolean;
+  hasExistingDocuments?: boolean;
+  onViewExistingDocs?: () => void;
+  onGoToStep1?: () => void;
 }
 
 const SEVERITY_COLORS: Record<GapItem["severity"], string> = {
-  critical: "bg-red-100 text-red-800 border-red-200",
-  high: "bg-orange-100 text-orange-800 border-orange-200",
-  medium: "bg-yellow-100 text-yellow-800 border-yellow-200",
-  low: "bg-green-100 text-green-800 border-green-200",
+  critical: "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400 border-red-200 dark:border-red-900/50",
+  high: "bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-400 border-orange-200 dark:border-orange-900/50",
+  medium: "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400 border-yellow-200 dark:border-yellow-900/50",
+  low: "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400 border-green-200 dark:border-green-900/50",
 };
 
 const STATUS_LABELS: Record<
   GapItem["status"],
   { label: string; icon: string; color: string }
 > = {
-  compliant: { label: "Compliant", icon: "OK", color: "text-green-700" },
-  partial: { label: "Partial", icon: "WARN", color: "text-yellow-700" },
-  missing: { label: "Missing", icon: "MISS", color: "text-red-700" },
+  compliant: { label: "Compliant", icon: "OK", color: "text-green-700 dark:text-green-400" },
+  partial: { label: "Partial", icon: "WARN", color: "text-yellow-700 dark:text-yellow-400" },
+  missing: { label: "Missing", icon: "MISS", color: "text-red-700 dark:text-red-400" },
 };
 
 const RISK_COLORS: Record<AnalysisResult["overall_risk_score"], string> = {
-  high: "text-red-600",
-  medium: "text-yellow-600",
-  low: "text-green-600",
+  high: "text-red-600 dark:text-red-400",
+  medium: "text-yellow-600 dark:text-yellow-400",
+  low: "text-green-600 dark:text-green-400",
 };
 
 export default function StepAnalysis({
   result,
   onGenerateDocs,
   isGenerating,
+  hasExistingDocuments = false,
+  onViewExistingDocs,
+  onGoToStep1,
 }: StepAnalysisProps) {
   const [expandedGap, setExpandedGap] = useState<string | null>(null);
 
@@ -49,7 +55,7 @@ export default function StepAnalysis({
     <div className="space-y-8">
       <h2 className="text-xl font-bold">Step 2: Analysis Results</h2>
 
-      <div className="bg-white rounded-xl border border-gray-200 p-6 flex flex-col md:flex-row items-center gap-6">
+      <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6 flex flex-col md:flex-row items-center gap-6 transition-colors">
         <div className="relative w-32 h-32">
           <svg className="w-32 h-32 transform -rotate-90" viewBox="0 0 120 120">
             <circle cx="60" cy="60" r="50" fill="none" stroke="#e5e7eb" strokeWidth="10" />
@@ -86,50 +92,50 @@ export default function StepAnalysis({
             </span>
           </div>
           <div className="grid grid-cols-3 gap-4 text-center">
-            <div className="bg-green-50 rounded-lg p-3">
-              <div className="text-xl font-bold text-green-700">
+            <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-3 transition-colors">
+              <div className="text-xl font-bold text-green-700 dark:text-green-400">
                 {result.gap_report.filter((g) => g.status === "compliant").length}
               </div>
-              <div className="text-xs text-green-600">Compliant</div>
+              <div className="text-xs text-green-600 dark:text-green-500">Compliant</div>
             </div>
-            <div className="bg-yellow-50 rounded-lg p-3">
-              <div className="text-xl font-bold text-yellow-700">
+            <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-3 transition-colors">
+              <div className="text-xl font-bold text-yellow-700 dark:text-yellow-400">
                 {result.gap_report.filter((g) => g.status === "partial").length}
               </div>
-              <div className="text-xs text-yellow-600">Partial</div>
+              <div className="text-xs text-yellow-600 dark:text-yellow-500">Partial</div>
             </div>
-            <div className="bg-red-50 rounded-lg p-3">
-              <div className="text-xl font-bold text-red-700">
+            <div className="bg-red-50 dark:bg-red-900/20 rounded-lg p-3 transition-colors">
+              <div className="text-xl font-bold text-red-700 dark:text-red-400">
                 {result.gap_report.filter((g) => g.status === "missing").length}
               </div>
-              <div className="text-xs text-red-600">Missing</div>
+              <div className="text-xs text-red-600 dark:text-red-500">Missing</div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 p-6">
-        <h3 className="font-semibold text-lg mb-4">Data Classification</h3>
+      <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6 transition-colors">
+        <h3 className="font-semibold text-lg mb-4 dark:text-gray-100">Data Classification</h3>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-200 text-left">
-                <th className="pb-2 font-medium text-gray-500">Field</th>
-                <th className="pb-2 font-medium text-gray-500">Categories</th>
-                <th className="pb-2 font-medium text-gray-500">Risk</th>
-                <th className="pb-2 font-medium text-gray-500">Confidence</th>
+              <tr className="border-b border-gray-200 dark:border-gray-800 text-left">
+                <th className="pb-2 font-medium text-gray-500 dark:text-gray-400">Field</th>
+                <th className="pb-2 font-medium text-gray-500 dark:text-gray-400">Categories</th>
+                <th className="pb-2 font-medium text-gray-500 dark:text-gray-400">Risk</th>
+                <th className="pb-2 font-medium text-gray-500 dark:text-gray-400">Confidence</th>
               </tr>
             </thead>
             <tbody>
               {result.data_classifications.map((dc: DataClassification) => (
-                <tr key={dc.field_name} className="border-b border-gray-100">
-                  <td className="py-2 font-mono text-xs">{dc.field_name}</td>
+                <tr key={dc.field_name} className="border-b border-gray-100 dark:border-gray-800/50">
+                  <td className="py-2 font-mono text-xs dark:text-gray-300">{dc.field_name}</td>
                   <td className="py-2">
                     <div className="flex flex-wrap gap-1">
                       {dc.categories.map((cat) => (
                         <span
                           key={cat}
-                          className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-xs"
+                          className="px-2 py-0.5 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded text-xs"
                         >
                           {cat}
                         </span>
@@ -159,8 +165,8 @@ export default function StepAnalysis({
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 p-6">
-        <h3 className="font-semibold text-lg mb-4">Gap Analysis</h3>
+      <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6 transition-colors">
+        <h3 className="font-semibold text-lg mb-4 dark:text-gray-100">Gap Analysis</h3>
         <div className="space-y-3">
           {result.gap_report.map((gap: GapItem) => {
             const statusInfo = STATUS_LABELS[gap.status];
@@ -179,17 +185,17 @@ export default function StepAnalysis({
               >
                 <button
                   onClick={() => setExpandedGap(isExpanded ? null : gap.obligation)}
-                  className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors text-left"
+                  className="w-full flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors text-left"
                 >
                   <div className="flex items-center gap-3">
                     <span className="text-xs">{statusInfo.icon}</span>
                     <div>
-                      <span className="font-medium">
+                      <span className="font-medium dark:text-gray-200">
                         {gap.obligation
                           .replace(/_/g, " ")
                           .replace(/\b\w/g, (c) => c.toUpperCase())}
                       </span>
-                      <span className="ml-2 text-xs text-gray-400">{gap.section_ref}</span>
+                      <span className="ml-2 text-xs text-gray-400 dark:text-gray-500">{gap.section_ref}</span>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
@@ -203,21 +209,21 @@ export default function StepAnalysis({
                 </button>
 
                 {isExpanded && (
-                  <div className="px-4 pb-4 border-t border-gray-100 pt-3 space-y-3 text-sm">
+                  <div className="px-4 pb-4 border-t border-gray-100 dark:border-gray-800 pt-3 space-y-3 text-sm">
                     <div>
-                      <span className="font-medium text-gray-700">Gap: </span>
-                      <span className="text-gray-600">{gap.gap_description}</span>
+                      <span className="font-medium text-gray-700 dark:text-gray-300">Gap: </span>
+                      <span className="text-gray-600 dark:text-gray-400">{gap.gap_description}</span>
                     </div>
                     <div>
-                      <span className="font-medium text-gray-700">Action: </span>
-                      <span className="text-gray-600">{gap.recommended_action}</span>
+                      <span className="font-medium text-gray-700 dark:text-gray-300">Action: </span>
+                      <span className="text-gray-600 dark:text-gray-400">{gap.recommended_action}</span>
                     </div>
                     {gap.matched_dpdp_text && (
-                      <div className="bg-gray-50 rounded p-3 text-xs text-gray-500 italic">
+                      <div className="bg-gray-50 dark:bg-gray-800/50 rounded p-3 text-xs text-gray-500 dark:text-gray-400 italic">
                         DPDP Reference: &quot;{gap.matched_dpdp_text}&quot;
                       </div>
                     )}
-                    <div className="text-xs text-gray-400">
+                    <div className="text-xs text-gray-400 dark:text-gray-500">
                       Confidence: {Math.round(gap.confidence * 100)}%
                     </div>
                   </div>
@@ -228,25 +234,46 @@ export default function StepAnalysis({
         </div>
       </div>
 
-      <button
-        onClick={onGenerateDocs}
-        disabled={isGenerating}
-        className="w-full py-3 bg-teal-600 hover:bg-teal-500 disabled:bg-gray-400 text-white font-semibold rounded-lg transition-colors"
-      >
-        {isGenerating ? "Generating Documents..." : "Generate Compliance Documents ->"}
-      </button>
-
-      <p className="text-center text-xs text-gray-400 mt-2">
-        Want to update your schema and re-analyze?{" "}
+      {hasExistingDocuments && onViewExistingDocs ? (
         <button
-          onClick={() => {
-            window.location.href = "/analyze";
-          }}
-          className="text-teal-600 hover:underline"
+          onClick={onViewExistingDocs}
+          className="w-full py-3 bg-teal-600 hover:bg-teal-500 text-white font-semibold rounded-lg transition-colors"
         >
-          Start New Analysis
+          View Previously Generated Documents -&gt;
         </button>
-      </p>
+      ) : (
+        <button
+          onClick={onGenerateDocs}
+          disabled={isGenerating}
+          className="w-full py-3 bg-teal-600 hover:bg-teal-500 disabled:bg-gray-400 text-white font-semibold rounded-lg transition-colors"
+        >
+          {isGenerating ? "Generating Documents..." : "Generate Compliance Documents ->"}
+        </button>
+      )}
+
+      {hasExistingDocuments && onGoToStep1 ? (
+        <p className="text-center text-xs text-gray-400 mt-2">
+          Want to modify your inputs and regenerate this report?{" "}
+          <button
+            onClick={onGoToStep1}
+            className="text-teal-600 hover:underline"
+          >
+            Go to Step 1
+          </button>
+        </p>
+      ) : (
+        <p className="text-center text-xs text-gray-400 mt-2">
+          Want to update your schema and re-analyze?{" "}
+          <button
+            onClick={() => {
+              window.location.href = "/analyze";
+            }}
+            className="text-teal-600 hover:underline"
+          >
+            Start New Analysis
+          </button>
+        </p>
+      )}
     </div>
   );
 }

@@ -1,25 +1,43 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
 import type { AnalyzeRequestBody, CompanyDetails } from "@/lib/api";
 
 interface StepUploadProps {
   onSubmit: (data: AnalyzeRequestBody) => void;
   isLoading: boolean;
+  initialInputs?: AnalyzeRequestBody | null;
+  isReadOnlyCompany?: boolean;
 }
 
-export default function StepUpload({ onSubmit, isLoading }: StepUploadProps) {
-  const [productDesc, setProductDesc] = useState("");
-  const [schemaText, setSchemaText] = useState("");
-  const [policyText, setPolicyText] = useState("");
-  const [company, setCompany] = useState<CompanyDetails>({
-    name: "",
-    contact_email: "",
-    dpo_name: "",
-    grievance_email: "",
-  });
+export default function StepUpload({ onSubmit, isLoading, initialInputs, isReadOnlyCompany }: StepUploadProps) {
+  const [productDesc, setProductDesc] = useState(initialInputs?.product_description || "");
+  const [schemaText, setSchemaText] = useState(initialInputs?.schema_text || "");
+  const [policyText, setPolicyText] = useState(initialInputs?.privacy_policy_text || "");
+  const [company, setCompany] = useState<CompanyDetails>(
+    initialInputs?.company_details || {
+      name: "",
+      contact_email: "",
+      dpo_name: "",
+      grievance_email: "",
+    }
+  );
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    if (initialInputs) {
+      setProductDesc(initialInputs.product_description);
+      setSchemaText(initialInputs.schema_text);
+      setPolicyText(initialInputs.privacy_policy_text || "");
+      setCompany(initialInputs.company_details);
+    } else {
+      setProductDesc("");
+      setSchemaText("");
+      setPolicyText("");
+      setCompany({ name: "", contact_email: "", dpo_name: "", grievance_email: "" });
+    }
+  }, [initialInputs]);
 
   const onSchemaDrop = useCallback((files: File[]) => {
     const file = files[0];
@@ -114,10 +132,10 @@ export default function StepUpload({ onSubmit, isLoading }: StepUploadProps) {
           value={productDesc}
           onChange={(e) => setProductDesc(e.target.value)}
           placeholder="Describe your product, what data it collects, and how it processes user information..."
-          className="w-full border border-gray-300 rounded-lg p-3 h-28 text-sm focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+          className="w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 rounded-lg p-3 h-28 text-sm focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-colors"
         />
         {errors.productDesc && (
-          <p className="text-red-500 text-xs mt-1">{errors.productDesc}</p>
+          <p className="text-red-500 dark:text-red-400 text-xs mt-1">{errors.productDesc}</p>
         )}
       </div>
 
@@ -129,23 +147,23 @@ export default function StepUpload({ onSubmit, isLoading }: StepUploadProps) {
           {...getSchemaRootProps()}
           className={`border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-colors ${
             isSchemaDragActive
-              ? "border-teal-400 bg-teal-50"
-              : "border-gray-300 hover:border-teal-300"
+              ? "border-teal-400 bg-teal-50 dark:bg-teal-900/20"
+              : "border-gray-300 dark:border-gray-700 hover:border-teal-300 dark:hover:border-teal-600"
           }`}
         >
           <input {...getSchemaInputProps()} />
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
             Drop a JSON file here, or click to upload
           </p>
         </div>
-        <p className="text-xs text-gray-400 mt-1">Or paste your schema below:</p>
+        <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Or paste your schema below:</p>
         <textarea
           value={schemaText}
           onChange={(e) => setSchemaText(e.target.value)}
           placeholder='{"users": ["name", "email", "phone"], "payments": ["credit_card", "upi_id"]}'
-          className="w-full border border-gray-300 rounded-lg p-3 h-24 text-sm mt-1 font-mono focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+          className="w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 rounded-lg p-3 h-24 text-sm mt-1 font-mono focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-colors"
         />
-        {errors.schema && <p className="text-red-500 text-xs mt-1">{errors.schema}</p>}
+        {errors.schema && <p className="text-red-500 dark:text-red-400 text-xs mt-1">{errors.schema}</p>}
       </div>
 
       <div>
@@ -154,64 +172,67 @@ export default function StepUpload({ onSubmit, isLoading }: StepUploadProps) {
         </label>
         <div
           {...getPolicyRootProps()}
-          className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-teal-300 transition-colors"
+          className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg p-4 text-center cursor-pointer hover:border-teal-300 dark:hover:border-teal-600 transition-colors"
         >
           <input {...getPolicyInputProps()} />
-          <p className="text-sm text-gray-500">Drop a TXT/PDF file, or click to upload</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Drop a TXT/PDF file, or click to upload</p>
         </div>
         <textarea
           value={policyText}
           onChange={(e) => setPolicyText(e.target.value)}
           placeholder="Paste your existing privacy policy text here (or leave empty)..."
-          className="w-full border border-gray-300 rounded-lg p-3 h-20 text-sm mt-1 focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+          className="w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 rounded-lg p-3 h-20 text-sm mt-1 focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-colors"
         />
-        {errors.policy && <p className="text-red-500 text-xs mt-1">{errors.policy}</p>}
+        {errors.policy && <p className="text-red-500 dark:text-red-400 text-xs mt-1">{errors.policy}</p>}
       </div>
 
-      <div className="bg-gray-50 rounded-lg p-4 space-y-3">
-        <h3 className="text-sm font-semibold text-gray-700">Company Details</h3>
+      <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 space-y-3 transition-colors">
+        <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Company Details</h3>
         <div className="grid md:grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs text-gray-500 mb-1">
+            <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">
               Company Name <span className="text-red-500">*</span>
             </label>
             <input
               value={company.name}
               onChange={(e) => setCompany({ ...company, name: e.target.value })}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+              disabled={isReadOnlyCompany}
+              className={`w-full border rounded-lg px-3 py-2 text-sm transition-colors ${isReadOnlyCompany ? "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700 cursor-not-allowed" : "border-gray-300 dark:border-gray-700 dark:bg-gray-900"}`}
               placeholder="Your Company Pvt Ltd"
             />
             {errors.companyName && (
-              <p className="text-red-500 text-xs mt-1">{errors.companyName}</p>
+              <p className="text-red-500 dark:text-red-400 text-xs mt-1">{errors.companyName}</p>
             )}
           </div>
           <div>
-            <label className="block text-xs text-gray-500 mb-1">
+            <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">
               Contact Email <span className="text-red-500">*</span>
             </label>
             <input
               type="email"
               value={company.contact_email}
               onChange={(e) => setCompany({ ...company, contact_email: e.target.value })}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+              disabled={isReadOnlyCompany}
+              className={`w-full border rounded-lg px-3 py-2 text-sm transition-colors ${isReadOnlyCompany ? "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700 cursor-not-allowed" : "border-gray-300 dark:border-gray-700 dark:bg-gray-900"}`}
               placeholder="privacy@company.in"
             />
-            {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
+            {errors.email && <p className="text-red-500 dark:text-red-400 text-xs mt-1">{errors.email}</p>}
           </div>
           <div>
-            <label className="block text-xs text-gray-500 mb-1">
-              DPO Name <span className="text-gray-400">(optional)</span>
+            <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">
+              DPO Name <span className="text-gray-400 dark:text-gray-500">(optional)</span>
             </label>
             <input
               value={company.dpo_name || ""}
               onChange={(e) => setCompany({ ...company, dpo_name: e.target.value })}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+              disabled={isReadOnlyCompany}
+              className={`w-full border rounded-lg px-3 py-2 text-sm transition-colors ${isReadOnlyCompany ? "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700 cursor-not-allowed" : "border-gray-300 dark:border-gray-700 dark:bg-gray-900"}`}
               placeholder="Data Protection Officer"
             />
           </div>
           <div>
-            <label className="block text-xs text-gray-500 mb-1">
-              Grievance Email <span className="text-gray-400">(optional)</span>
+            <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">
+              Grievance Email <span className="text-gray-400 dark:text-gray-500">(optional)</span>
             </label>
             <input
               type="email"
@@ -219,7 +240,8 @@ export default function StepUpload({ onSubmit, isLoading }: StepUploadProps) {
               onChange={(e) =>
                 setCompany({ ...company, grievance_email: e.target.value })
               }
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+              disabled={isReadOnlyCompany}
+              className={`w-full border rounded-lg px-3 py-2 text-sm transition-colors ${isReadOnlyCompany ? "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700 cursor-not-allowed" : "border-gray-300 dark:border-gray-700 dark:bg-gray-900"}`}
               placeholder="grievance@company.in"
             />
           </div>
