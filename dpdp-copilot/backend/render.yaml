@@ -5,6 +5,7 @@ services:
     region: singapore
     plan: free
     rootDir: dpdp-copilot/backend
+    pythonVersion: "3.11.0"
     buildCommand: |
       pip install -r requirements.txt
       python -m app.knowledge.ingest --rebuild
