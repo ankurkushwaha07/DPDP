@@ -44,7 +44,7 @@ export default function RootLayout({
                 <div className="w-px h-5 bg-gray-200 dark:bg-gray-800 mx-1" />
                 <SignedOut>
                   <a href="/analyze" className="text-sm text-gray-600 dark:text-gray-300 hover:text-teal-600 dark:hover:text-teal-400 transition">
-                    Try Free
+                    Continue without logging in
                   </a>
                   <SignInButton mode="modal">
                     <button className="bg-teal-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-teal-700 transition">
