@@ -352,23 +352,12 @@ async def get_admin_analyses():
 
 @app.get("/api/history")
 async def get_history(request: Request):
-    """Return all past analyses (demo mode: bypass session if local)."""
-    if ENVIRONMENT == "local":
-        with get_db() as conn:
-            rows = conn.execute(
-                """SELECT id, company_name, overall_risk_score, compliance_percentage,
-                          version, status, created_at
-                   FROM analyses
-                   WHERE status = 'completed'
-                   ORDER BY created_at DESC
-                   LIMIT 50"""
-            ).fetchall()
-    else:
-        session_id = request.cookies.get(SESSION_COOKIE_NAME)
-        if not session_id:
-            return HistoryResponse(analyses=[])
+    """Return past analyses. Session-scoped when cookie present, global fallback otherwise."""
+    session_id = request.cookies.get(SESSION_COOKIE_NAME)
 
-        with get_db() as conn:
+    with get_db() as conn:
+        if session_id:
+            # Try session-scoped history first
             rows = conn.execute(
                 """SELECT id, company_name, overall_risk_score, compliance_percentage,
                           version, status, created_at
@@ -377,6 +366,19 @@ async def get_history(request: Request):
                    ORDER BY created_at DESC
                    LIMIT 20""",
                 (session_id,),
+            ).fetchall()
+        else:
+            rows = []
+
+        # If no session history, return all completed analyses (cross-session fallback)
+        if not rows:
+            rows = conn.execute(
+                """SELECT id, company_name, overall_risk_score, compliance_percentage,
+                          version, status, created_at
+                   FROM analyses
+                   WHERE status = 'completed'
+                   ORDER BY created_at DESC
+                   LIMIT 50"""
             ).fetchall()
 
     analyses = []
