@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { SignedOut } from "@clerk/nextjs";
 
 const DEMO_SCENARIOS = [
   {
@@ -71,12 +72,14 @@ export default function HomePage() {
             >
               Start Analysis →
             </button>
-            <button
-              onClick={() => router.push("/analyze")}
-              className="w-full sm:w-auto px-6 py-3 border border-white/30 hover:border-white/60 text-white/80 hover:text-white font-medium rounded-lg transition-colors text-sm sm:text-base"
-            >
-              Continue without logging in
-            </button>
+            <SignedOut>
+              <button
+                onClick={() => router.push("/analyze")}
+                className="w-full sm:w-auto px-6 py-3 border border-white/30 hover:border-white/60 text-white/80 hover:text-white font-medium rounded-lg transition-colors text-sm sm:text-base"
+              >
+                Continue without logging in
+              </button>
+            </SignedOut>
           </div>
         </div>
       </section>
