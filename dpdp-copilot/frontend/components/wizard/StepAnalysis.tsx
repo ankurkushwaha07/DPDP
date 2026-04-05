@@ -55,9 +55,9 @@ export default function StepAnalysis({
     <div className="space-y-8">
       <h2 className="text-xl font-bold">Step 2: Analysis Results</h2>
 
-      <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6 flex flex-col md:flex-row items-center gap-6 transition-colors">
-        <div className="relative w-32 h-32">
-          <svg className="w-32 h-32 transform -rotate-90" viewBox="0 0 120 120">
+      <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4 sm:p-6 flex flex-col sm:flex-row items-center gap-4 sm:gap-6 transition-colors">
+        <div className="relative w-24 h-24 sm:w-32 sm:h-32 flex-shrink-0">
+          <svg className="w-24 h-24 sm:w-32 sm:h-32 transform -rotate-90" viewBox="0 0 120 120">
             <circle cx="60" cy="60" r="50" fill="none" stroke="#e5e7eb" strokeWidth="10" />
             <circle
               cx="60"
@@ -77,35 +77,35 @@ export default function StepAnalysis({
             />
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className={`text-3xl font-bold ${scoreColor}`}>
+            <span className={`text-2xl sm:text-3xl font-bold ${scoreColor}`}>
               {result.compliance_percentage}%
             </span>
             <span className="text-xs text-gray-500">Compliant</span>
           </div>
         </div>
 
-        <div className="flex-1">
+        <div className="flex-1 w-full">
           <div className="flex items-center gap-2 mb-2">
             <span className="text-sm text-gray-600">Overall Risk:</span>
             <span className={`font-bold uppercase ${RISK_COLORS[result.overall_risk_score]}`}>
               {result.overall_risk_score}
             </span>
           </div>
-          <div className="grid grid-cols-3 gap-4 text-center">
-            <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-3 transition-colors">
-              <div className="text-xl font-bold text-green-700 dark:text-green-400">
+          <div className="grid grid-cols-3 gap-2 sm:gap-4 text-center">
+            <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-2 sm:p-3 transition-colors">
+              <div className="text-lg sm:text-xl font-bold text-green-700 dark:text-green-400">
                 {result.gap_report.filter((g) => g.status === "compliant").length}
               </div>
               <div className="text-xs text-green-600 dark:text-green-500">Compliant</div>
             </div>
-            <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-3 transition-colors">
-              <div className="text-xl font-bold text-yellow-700 dark:text-yellow-400">
+            <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-2 sm:p-3 transition-colors">
+              <div className="text-lg sm:text-xl font-bold text-yellow-700 dark:text-yellow-400">
                 {result.gap_report.filter((g) => g.status === "partial").length}
               </div>
               <div className="text-xs text-yellow-600 dark:text-yellow-500">Partial</div>
             </div>
-            <div className="bg-red-50 dark:bg-red-900/20 rounded-lg p-3 transition-colors">
-              <div className="text-xl font-bold text-red-700 dark:text-red-400">
+            <div className="bg-red-50 dark:bg-red-900/20 rounded-lg p-2 sm:p-3 transition-colors">
+              <div className="text-lg sm:text-xl font-bold text-red-700 dark:text-red-400">
                 {result.gap_report.filter((g) => g.status === "missing").length}
               </div>
               <div className="text-xs text-red-600 dark:text-red-500">Missing</div>
@@ -114,10 +114,10 @@ export default function StepAnalysis({
         </div>
       </div>
 
-      <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6 transition-colors">
-        <h3 className="font-semibold text-lg mb-4 dark:text-gray-100">Data Classification</h3>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+      <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4 sm:p-6 transition-colors">
+        <h3 className="font-semibold text-base sm:text-lg mb-4 dark:text-gray-100">Data Classification</h3>
+        <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
+          <table className="w-full text-sm min-w-[400px]">
             <thead>
               <tr className="border-b border-gray-200 dark:border-gray-800 text-left">
                 <th className="pb-2 font-medium text-gray-500 dark:text-gray-400">Field</th>
@@ -165,8 +165,8 @@ export default function StepAnalysis({
         </div>
       </div>
 
-      <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6 transition-colors">
-        <h3 className="font-semibold text-lg mb-4 dark:text-gray-100">Gap Analysis</h3>
+      <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4 sm:p-6 transition-colors">
+        <h3 className="font-semibold text-base sm:text-lg mb-4 dark:text-gray-100">Gap Analysis</h3>
         <div className="space-y-3">
           {result.gap_report.map((gap: GapItem) => {
             const statusInfo = STATUS_LABELS[gap.status];
@@ -185,12 +185,12 @@ export default function StepAnalysis({
               >
                 <button
                   onClick={() => setExpandedGap(isExpanded ? null : gap.obligation)}
-                  className="w-full flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors text-left"
+                  className="w-full flex items-start justify-between p-3 sm:p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors text-left gap-2"
                 >
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs">{statusInfo.icon}</span>
-                    <div>
-                      <span className="font-medium dark:text-gray-200">
+                  <div className="flex items-start gap-2 sm:gap-3 min-w-0">
+                    <span className="text-xs mt-0.5 flex-shrink-0">{statusInfo.icon}</span>
+                    <div className="min-w-0">
+                      <span className="font-medium dark:text-gray-200 text-sm break-words">
                         {gap.obligation
                           .replace(/_/g, " ")
                           .replace(/\b\w/g, (c) => c.toUpperCase())}
@@ -198,7 +198,7 @@ export default function StepAnalysis({
                       <span className="ml-2 text-xs text-gray-400 dark:text-gray-500">{gap.section_ref}</span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
                     <span
                       className={`px-2 py-0.5 rounded text-xs font-medium border ${SEVERITY_COLORS[gap.severity]}`}
                     >

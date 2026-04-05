@@ -209,7 +209,7 @@ function AnalyzePageContent() {
     step === "upload" || step === "analyzing" ? 0 : step === "results" ? 1 : 2;
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-10 flex gap-6">
+    <div className="max-w-6xl mx-auto px-3 sm:px-6 py-6 sm:py-10 flex gap-4 sm:gap-6">
       <aside className="hidden lg:block w-64 flex-shrink-0">
         <div className="sticky top-24 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 transition-colors">
           <HistorySidebar
@@ -222,8 +222,8 @@ function AnalyzePageContent() {
         </div>
       </aside>
 
-      <div className="flex-1 max-w-4xl">
-        <div className="flex items-center justify-center gap-2 mb-10">
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center justify-center gap-1 sm:gap-2 mb-6 sm:mb-10">
           {steps.map((s, i) => {
             const isClickable = isHistoryView && result != null;
             return (
@@ -235,7 +235,7 @@ function AnalyzePageContent() {
                     }
                   }}
                   disabled={!isClickable && i > activeStepIndex}
-                  className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors ${
+                  className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-medium transition-colors ${
                     i <= activeStepIndex
                       ? "bg-teal-600 text-white hover:bg-teal-700"
                       : isClickable ? "bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700" : "bg-gray-200 dark:bg-gray-800 text-gray-500 dark:text-gray-600 cursor-not-allowed"
@@ -244,7 +244,7 @@ function AnalyzePageContent() {
                   {i + 1}
                 </button>
                 <span
-                  className={`ml-2 text-sm ${
+                  className={`ml-1 sm:ml-2 text-xs sm:text-sm ${
                     i <= activeStepIndex
                       ? "text-teal-700 dark:text-teal-400 font-medium"
                       : "text-gray-400 dark:text-gray-500"
@@ -254,7 +254,7 @@ function AnalyzePageContent() {
                 </span>
                 {i < steps.length - 1 && (
                   <div
-                    className={`w-12 h-0.5 mx-3 ${
+                    className={`w-6 sm:w-12 h-0.5 mx-1 sm:mx-3 ${
                       i < activeStepIndex ? "bg-teal-400" : "bg-gray-200 dark:bg-gray-800"
                     }`}
                   />

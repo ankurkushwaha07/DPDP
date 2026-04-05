@@ -125,9 +125,11 @@ export default function StepUpload({ onSubmit, isLoading, initialInputs, isHisto
       <h2 className="text-xl font-bold">Step 1: Upload Your Data</h2>
 
       <div>
-        <label className="block text-sm font-medium mb-1 flex justify-between">
-          <span>Product Description <span className="text-red-500">*</span></span>
-          {isHistoryView && <span className="text-xs text-teal-600 dark:text-teal-400 font-semibold bg-teal-50 dark:bg-teal-900/30 px-2 py-0.5 rounded">Locked (History Mode)</span>}
+        <label className="block text-sm font-medium mb-1">
+          <div className="flex flex-wrap items-center justify-between gap-1">
+            <span>Product Description <span className="text-red-500">*</span></span>
+            {isHistoryView && <span className="text-xs text-teal-600 dark:text-teal-400 font-semibold bg-teal-50 dark:bg-teal-900/30 px-2 py-0.5 rounded">Locked (History Mode)</span>}
+          </div>
         </label>
         <textarea
           value={productDesc}
@@ -142,9 +144,11 @@ export default function StepUpload({ onSubmit, isLoading, initialInputs, isHisto
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-1 flex justify-between">
-          <span>Data Schema <span className="text-red-500">*</span></span>
-          {isHistoryView && <span className="text-xs text-blue-600 dark:text-blue-400 font-semibold bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded">Editable</span>}
+        <label className="block text-sm font-medium mb-1">
+          <div className="flex flex-wrap items-center justify-between gap-1">
+            <span>Data Schema <span className="text-red-500">*</span></span>
+            {isHistoryView && <span className="text-xs text-blue-600 dark:text-blue-400 font-semibold bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded">Editable</span>}
+          </div>
         </label>
         <div
           {...getSchemaRootProps()}
@@ -170,9 +174,11 @@ export default function StepUpload({ onSubmit, isLoading, initialInputs, isHisto
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-1 flex justify-between">
-          <span>Existing Privacy Policy <span className="text-gray-400">(optional)</span></span>
-          {isHistoryView && <span className="text-xs text-blue-600 dark:text-blue-400 font-semibold bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded">Editable to Patch Gaps</span>}
+        <label className="block text-sm font-medium mb-1">
+          <div className="flex flex-wrap items-center justify-between gap-1">
+            <span>Existing Privacy Policy <span className="text-gray-400">(optional)</span></span>
+            {isHistoryView && <span className="text-xs text-blue-600 dark:text-blue-400 font-semibold bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded">Editable to Patch Gaps</span>}
+          </div>
         </label>
         {isHistoryView && (
           <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
