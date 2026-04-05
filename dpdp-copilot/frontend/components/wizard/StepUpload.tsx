@@ -9,9 +9,10 @@ interface StepUploadProps {
   isLoading: boolean;
   initialInputs?: AnalyzeRequestBody | null;
   isHistoryView?: boolean;
+  isDemoMode?: boolean;
 }
 
-export default function StepUpload({ onSubmit, isLoading, initialInputs, isHistoryView }: StepUploadProps) {
+export default function StepUpload({ onSubmit, isLoading, initialInputs, isHistoryView, isDemoMode }: StepUploadProps) {
   const [productDesc, setProductDesc] = useState(initialInputs?.product_description || "");
   const [schemaText, setSchemaText] = useState(initialInputs?.schema_text || "");
   const [policyText, setPolicyText] = useState(initialInputs?.privacy_policy_text || "");
@@ -123,6 +124,15 @@ export default function StepUpload({ onSubmit, isLoading, initialInputs, isHisto
   return (
     <div className="space-y-6">
       <h2 className="text-xl font-bold">Step 1: Upload Your Data</h2>
+
+      {isDemoMode && (
+        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg px-4 py-3 flex items-start gap-2">
+          <span className="text-blue-500 flex-shrink-0 mt-0.5">ℹ</span>
+          <p className="text-sm text-blue-800 dark:text-blue-300">
+            <span className="font-semibold">Demo mode</span> — the form is pre-filled with sample data. Review it, make any changes, then click &quot;Analyze Compliance&quot; to see instant results.
+          </p>
+        </div>
+      )}
 
       <div>
         <label className="block text-sm font-medium mb-1">

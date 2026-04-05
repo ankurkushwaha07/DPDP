@@ -17,6 +17,43 @@ import type {
 
 type Step = "upload" | "analyzing" | "results" | "documents";
 
+const DEMO_INPUTS: Record<string, { product_description: string; schema_text: string; privacy_policy_text: string; company_details: { name: string; contact_email: string; dpo_name: string; grievance_email: string } }> = {
+  ecommerce: {
+    product_description: "ShopEasy is an Indian e-commerce platform that enables customers to browse, purchase, and track products. It collects personal, financial, and behavioral data to process orders, enable payments, and personalise the shopping experience.",
+    schema_text: JSON.stringify({
+      users: ["name", "email", "phone", "address", "date_of_birth"],
+      payments: ["credit_card_number", "upi_id", "bank_account", "transaction_history"],
+      behaviour: ["browsing_history", "search_queries", "wishlist", "purchase_history"],
+      marketing: ["device_id", "ip_address", "location"]
+    }, null, 2),
+    privacy_policy_text: "ShopEasy collects personal information including name, email, phone and address for order fulfillment. Payment data is collected for transaction processing. We may share data with delivery partners. Users can contact support@shopeasy.in for queries.",
+    company_details: { name: "ShopEasy Pvt Ltd", contact_email: "privacy@shopeasy.in", dpo_name: "Rahul Sharma", grievance_email: "grievance@shopeasy.in" }
+  },
+  edtech: {
+    product_description: "LearnBharat is a K-12 online learning platform serving students aged 6-18 across India. It collects student profiles, academic performance, and learning behaviour data to personalise education and report progress to parents.",
+    schema_text: JSON.stringify({
+      students: ["name", "age", "grade", "school_name", "parent_name", "parent_email", "parent_phone"],
+      academic: ["test_scores", "assignment_grades", "attendance", "learning_pace", "subject_performance"],
+      behaviour: ["video_watch_time", "quiz_attempts", "login_frequency", "device_used"],
+      content: ["preferred_subjects", "difficulty_level", "completed_courses"]
+    }, null, 2),
+    privacy_policy_text: "LearnBharat collects student information to provide personalised learning. We collect name, age, grade and academic performance data. Parent contact details are collected for progress reports. Data is stored securely and not shared with third parties.",
+    company_details: { name: "LearnBharat EdTech Pvt Ltd", contact_email: "privacy@learnbharat.in", dpo_name: "Priya Menon", grievance_email: "grievance@learnbharat.in" }
+  },
+  healthtech: {
+    product_description: "MedConnect is a telemedicine platform connecting patients with doctors across India. It handles medical records, prescriptions, health vitals, Aadhaar-based identity verification, and biometric data for authentication.",
+    schema_text: JSON.stringify({
+      patients: ["name", "aadhaar_number", "date_of_birth", "gender", "blood_group", "emergency_contact"],
+      medical: ["medical_history", "current_medications", "allergies", "diagnoses", "lab_reports", "prescriptions"],
+      biometric: ["fingerprint_hash", "face_id", "voice_signature"],
+      vitals: ["blood_pressure", "blood_sugar", "heart_rate", "weight", "bmi"],
+      telemedicine: ["consultation_recordings", "chat_transcripts", "doctor_notes"]
+    }, null, 2),
+    privacy_policy_text: "MedConnect collects personal and health information to facilitate telemedicine consultations. We collect Aadhaar for identity verification, medical history for treatment, and biometric data for authentication. Health data is encrypted and accessible only to treating physicians.",
+    company_details: { name: "MedConnect Health Pvt Ltd", contact_email: "privacy@medconnect.in", dpo_name: "Dr. Anita Rao", grievance_email: "grievance@medconnect.in" }
+  }
+};
+
 function AnalyzePageContent() {
   const searchParams = useSearchParams();
   const demoScenario = searchParams.get("demo");
@@ -67,7 +104,9 @@ function AnalyzePageContent() {
       demoScenario &&
       ["ecommerce", "edtech", "healthtech"].includes(demoScenario)
     ) {
-      void handleLoadDemo(demoScenario as "ecommerce" | "edtech" | "healthtech");
+      // Pre-fill the form with demo inputs instead of auto-running analysis
+      const inputs = DEMO_INPUTS[demoScenario];
+      if (inputs) setInitialInputs(inputs);
     }
   }, [demoScenario, historyId]);
 
@@ -128,6 +167,19 @@ function AnalyzePageContent() {
     setProgress("Submitting for analysis...");
 
     try {
+      // If this is a demo scenario, use pre-computed results instantly
+      if (demoScenario && ["ecommerce", "edtech", "healthtech"].includes(demoScenario)) {
+        setProgress("Loading demo results...");
+        const demoResult = await loadDemo(demoScenario as "ecommerce" | "edtech" | "healthtech");
+        if (demoResult.status === "completed" && demoResult.result) {
+          setAnalysisId(demoResult.analysis_id);
+          setResult(demoResult.result);
+          changeStep("results");
+          return;
+        }
+        throw new Error("Demo data unavailable");
+      }
+
       if (isHistoryView && analysisId) {
         data.parent_analysis_id = analysisId;
       }
@@ -303,11 +355,12 @@ function AnalyzePageContent() {
         )}
 
         {step === "upload" && (
-          <StepUpload 
-            onSubmit={handleSubmit} 
-            isLoading={isLoading} 
+          <StepUpload
+            onSubmit={handleSubmit}
+            isLoading={isLoading}
             initialInputs={initialInputs}
             isHistoryView={isHistoryView}
+            isDemoMode={!!(demoScenario && ["ecommerce", "edtech", "healthtech"].includes(demoScenario))}
           />
         )}
 
