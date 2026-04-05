@@ -2,6 +2,7 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import { useUser, SignInButton } from "@clerk/nextjs";
 import StepUpload from "@/components/wizard/StepUpload";
 import StepAnalysis from "@/components/wizard/StepAnalysis";
 import StepDocuments from "@/components/wizard/StepDocuments";
@@ -20,6 +21,8 @@ function AnalyzePageContent() {
   const searchParams = useSearchParams();
   const demoScenario = searchParams.get("demo");
   const historyId = searchParams.get("history");
+  const { isSignedIn } = useUser();
+  const isGuest = !isSignedIn;
 
   const [step, setStep] = useState<Step>("upload");
   const [analysisId, setAnalysisId] = useState<string | null>(null);
@@ -58,7 +61,7 @@ function AnalyzePageContent() {
   }, []);
 
   useEffect(() => {
-    if (historyId) {
+    if (historyId && !isGuest) {
       void handleLoadHistory(historyId);
     } else if (
       demoScenario &&
@@ -209,7 +212,25 @@ function AnalyzePageContent() {
     step === "upload" || step === "analyzing" ? 0 : step === "results" ? 1 : 2;
 
   return (
-    <div className="max-w-6xl mx-auto px-3 sm:px-6 py-6 sm:py-10 flex gap-4 sm:gap-6">
+    <div className="max-w-6xl mx-auto px-3 sm:px-6 pb-6 sm:pb-10">
+      {isGuest && (
+        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg px-4 py-3 mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-start gap-2">
+            <span className="text-amber-500 mt-0.5 flex-shrink-0">⚠</span>
+            <p className="text-sm text-amber-800 dark:text-amber-300">
+              <span className="font-semibold">Guest mode</span> — you can run a full analysis and download your documents, but this session won&apos;t be saved. You won&apos;t be able to access it later.
+            </p>
+          </div>
+          <SignInButton mode="modal">
+            <button className="flex-shrink-0 text-sm bg-amber-500 hover:bg-amber-600 text-white px-3 py-1.5 rounded-lg font-medium transition whitespace-nowrap">
+              Sign in to save
+            </button>
+          </SignInButton>
+        </div>
+      )}
+
+    <div className="flex gap-4 sm:gap-6 pt-6 sm:pt-10">
+      {!isGuest && (
       <aside className="hidden lg:block w-64 flex-shrink-0">
         <div className="sticky top-24 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 transition-colors">
           <HistorySidebar
@@ -221,6 +242,7 @@ function AnalyzePageContent() {
           />
         </div>
       </aside>
+      )}
 
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-center gap-1 sm:gap-2 mb-6 sm:mb-10">
@@ -304,21 +326,22 @@ function AnalyzePageContent() {
             result={result}
             onGenerateDocs={handleGenerateDocs}
             isGenerating={isGenerating}
-            hasExistingDocuments={documents.length > 0}
+            hasExistingDocuments={!isGuest && documents.length > 0}
             onViewExistingDocs={() => changeStep("documents")}
             onGoToStep1={() => changeStep("upload")}
           />
         )}
 
         {step === "documents" && (
-          <StepDocuments 
-            documents={documents} 
+          <StepDocuments
+            documents={documents}
             onRestart={handleRestart}
-            isHistoryView={isHistoryView}
+            isHistoryView={!isGuest && isHistoryView}
             onBackToResults={() => changeStep("results")}
           />
         )}
       </div>
+    </div>
     </div>
   );
 }

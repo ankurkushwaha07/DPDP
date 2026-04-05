@@ -64,12 +64,20 @@ export default function HomePage() {
           <p className="mt-2 text-xs sm:text-sm text-gray-400">
             Deadline: May 13, 2027 — Penalties up to INR 250 crore per violation
           </p>
-          <button
-            onClick={() => router.push("/analyze")}
-            className="mt-6 sm:mt-8 px-6 sm:px-8 py-3 bg-teal-500 hover:bg-teal-400 text-white font-semibold rounded-lg transition-colors text-base sm:text-lg"
-          >
-            Start Analysis →
-          </button>
+          <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
+            <button
+              onClick={() => router.push("/analyze")}
+              className="w-full sm:w-auto px-6 sm:px-8 py-3 bg-teal-500 hover:bg-teal-400 text-white font-semibold rounded-lg transition-colors text-base sm:text-lg"
+            >
+              Start Analysis →
+            </button>
+            <button
+              onClick={() => router.push("/analyze")}
+              className="w-full sm:w-auto px-6 py-3 border border-white/30 hover:border-white/60 text-white/80 hover:text-white font-medium rounded-lg transition-colors text-sm sm:text-base"
+            >
+              Continue without logging in
+            </button>
+          </div>
         </div>
       </section>
 

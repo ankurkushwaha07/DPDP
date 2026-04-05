@@ -43,6 +43,9 @@ export default function RootLayout({
                 <ThemeToggle />
                 <div className="w-px h-5 bg-gray-200 dark:bg-gray-800 mx-1" />
                 <SignedOut>
+                  <a href="/analyze" className="text-sm text-gray-600 dark:text-gray-300 hover:text-teal-600 dark:hover:text-teal-400 transition">
+                    Try Free
+                  </a>
                   <SignInButton mode="modal">
                     <button className="bg-teal-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-teal-700 transition">
                       Sign In
@@ -83,13 +86,16 @@ export default function RootLayout({
                 <SignedIn>
                   <a href="/admin" onClick={() => setMenuOpen(false)} className="px-3 py-2 rounded-lg text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">Admin</a>
                 </SignedIn>
-                <div className="px-3 py-2">
+                <div className="px-3 py-2 flex flex-col gap-2">
                   <SignedOut>
                     <SignInButton mode="modal">
                       <button className="w-full bg-teal-600 text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-teal-700 transition">
                         Sign In
                       </button>
                     </SignInButton>
+                    <a href="/analyze" onClick={() => setMenuOpen(false)} className="w-full text-center border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition">
+                      Continue without logging in
+                    </a>
                   </SignedOut>
                   <SignedIn>
                     <div className="flex items-center gap-2">
