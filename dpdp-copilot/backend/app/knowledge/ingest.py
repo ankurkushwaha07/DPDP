@@ -31,10 +31,9 @@ def get_chroma_client() -> chromadb.PersistentClient:
 
 
 def get_embedding_function():
-    """Get the sentence-transformers embedding function."""
-    return embedding_functions.SentenceTransformerEmbeddingFunction(
-        model_name=EMBEDDING_MODEL_NAME
-    )
+    """Get the embedding function. Uses ChromaDB's default (ONNX-based all-MiniLM-L6-v2)
+    which avoids loading PyTorch/sentence-transformers at runtime, saving ~300MB RAM."""
+    return embedding_functions.DefaultEmbeddingFunction()
 
 
 def get_or_create_collection(client=None):

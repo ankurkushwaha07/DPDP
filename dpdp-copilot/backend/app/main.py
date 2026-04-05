@@ -30,6 +30,7 @@ from app.models.schemas import (
 )
 from app.db.database import init_db, get_db
 from app.analysis.pipeline import run_analysis_pipeline
+from app.analysis.validator import validate_inputs, ValidationError
 from app.config import (
     MAX_ANALYSES_PER_IP_PER_HOUR, FRONTEND_URL, LOG_LEVEL, LOG_DIR,
     SESSION_COOKIE_NAME, SESSION_COOKIE_MAX_AGE, ENVIRONMENT,
@@ -130,6 +131,13 @@ def _set_session_cookie(response: JSONResponse, session_id: str) -> JSONResponse
 @limiter.limit(f"{MAX_ANALYSES_PER_IP_PER_HOUR}/hour")
 async def analyze(request: Request, body: AnalyzeRequest, background_tasks: BackgroundTasks):
     """Start async analysis. Returns immediately with analysis_id for polling."""
+
+    # Validate inputs before queuing any LLM work
+    try:
+        validate_inputs(body.product_description, body.schema_text)
+    except ValidationError as e:
+        raise HTTPException(status_code=422, detail=str(e))
+
     analysis_id = str(uuid.uuid4())
     session_id = get_or_create_session(request)
 
@@ -395,7 +403,8 @@ async def get_history(request: Request):
 # === Generate, Download, Demo (MP-19) ===
 
 @app.post("/api/generate")
-async def generate(body: GenerateRequest):
+@limiter.limit("10/hour")
+async def generate(request: Request, body: GenerateRequest):
     """Generate compliance documents from a completed analysis."""
     with get_db() as conn:
         row = conn.execute(
