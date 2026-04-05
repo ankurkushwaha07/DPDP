@@ -4,6 +4,7 @@ services:
     runtime: python
     region: singapore
     plan: free
+    rootDir: dpdp-copilot/backend
     buildCommand: |
       pip install -r requirements.txt
       python -m app.knowledge.ingest --rebuild
@@ -11,15 +12,13 @@ services:
     envVars:
       - key: GEMINI_API_KEY
         sync: false
+      - key: DATABASE_URL
+        sync: false
       - key: FRONTEND_URL
         sync: false
-      - key: DB_PATH
-        value: data/copilot.db
+      - key: ENVIRONMENT
+        value: production
       - key: CHROMA_DIR
         value: data/chroma_db
       - key: LOG_LEVEL
         value: INFO
-    disk:
-      name: dpdp-data
-      mountPath: /app/data
-      sizeGB: 1
