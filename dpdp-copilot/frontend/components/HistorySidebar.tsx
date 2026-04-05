@@ -7,6 +7,7 @@ import type { HistoryItem } from "@/lib/api";
 interface HistorySidebarProps {
   onSelectAnalysis: (analysisId: string) => void;
   currentAnalysisId?: string | null;
+  refreshKey?: number;
 }
 
 const RISK_BADGE: Record<HistoryItem["risk_score"], string> = {
@@ -18,13 +19,14 @@ const RISK_BADGE: Record<HistoryItem["risk_score"], string> = {
 export default function HistorySidebar({
   onSelectAnalysis,
   currentAnalysisId,
+  refreshKey,
 }: HistorySidebarProps) {
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     void loadHistory();
-  }, []);
+  }, [refreshKey]);
 
   const loadHistory = async () => {
     setIsLoading(true);

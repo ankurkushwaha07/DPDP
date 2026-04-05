@@ -53,9 +53,12 @@ def generate_documents(
             analysis_row = dict(row)
 
     # Parse stored JSON fields
-    classifications = json.loads(analysis_row.get("classifications", "[]"))
-    obligations = json.loads(analysis_row.get("obligations", "[]"))
-    gap_report = json.loads(analysis_row.get("gap_report", "[]"))
+    raw_classifications = analysis_row.get("classifications", "[]")
+    raw_obligations = analysis_row.get("obligations", "[]")
+    raw_gap_report = analysis_row.get("gap_report", "[]")
+    classifications = json.loads(raw_classifications) if isinstance(raw_classifications, str) else raw_classifications
+    obligations = json.loads(raw_obligations) if isinstance(raw_obligations, str) else raw_obligations
+    gap_report = json.loads(raw_gap_report) if isinstance(raw_gap_report, str) else raw_gap_report
 
     # Build template context
     context = _build_context(analysis_row, classifications, obligations, gap_report)

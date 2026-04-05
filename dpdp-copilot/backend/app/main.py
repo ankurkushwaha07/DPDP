@@ -100,7 +100,7 @@ def get_or_create_session(request: Request) -> str:
             existing = conn.execute("SELECT id FROM sessions WHERE id = ?", (session_id,)).fetchone()
             if existing:
                 conn.execute(
-                    "UPDATE sessions SET last_seen_at = datetime('now') WHERE id = ?",
+                    "UPDATE sessions SET last_seen_at = CURRENT_TIMESTAMP WHERE id = ?",
                     (session_id,),
                 )
                 return session_id
@@ -192,9 +192,9 @@ async def get_status(analysis_id: str):
 
     if status == "completed":
         response["result"] = {
-            "data_classifications": json.loads(row["classifications"]),
-            "applicable_obligations": json.loads(row["obligations"]),
-            "gap_report": json.loads(row["gap_report"]),
+            "data_classifications": json.loads(row["classifications"]) if isinstance(row["classifications"], str) else row["classifications"],
+            "applicable_obligations": json.loads(row["obligations"]) if isinstance(row["obligations"], str) else row["obligations"],
+            "gap_report": json.loads(row["gap_report"]) if isinstance(row["gap_report"], str) else row["gap_report"],
             "overall_risk_score": row["overall_risk_score"],
             "compliance_percentage": row["compliance_percentage"],
         }
@@ -250,6 +250,33 @@ async def health():
         version="1.0.0",
     )
 
+@app.get("/api/admin/metrics")
+async def get_admin_metrics():
+    """Return platform metrics for the admin dashboard."""
+    with get_db() as conn:
+        stats = conn.execute("""
+            SELECT 
+                COUNT(DISTINCT session_id) as total_users,
+                COUNT(id) as total_analyses,
+                SUM(CASE WHEN overall_risk_score = 'high' THEN 1 ELSE 0 END) as high_risk,
+                SUM(CASE WHEN overall_risk_score = 'medium' THEN 1 ELSE 0 END) as medium_risk,
+                SUM(CASE WHEN overall_risk_score = 'low' THEN 1 ELSE 0 END) as low_risk,
+                AVG(compliance_percentage) as avg_compliance
+            FROM analyses
+            WHERE status = 'completed'
+        """).fetchone()
+            
+    return {
+        "total_users": stats["total_users"] or 0,
+        "total_analyses": stats["total_analyses"] or 0,
+        "risk_breakdown": {
+            "high": stats["high_risk"] or 0,
+            "medium": stats["medium_risk"] or 0,
+            "low": stats["low_risk"] or 0
+        },
+        "average_compliance": round(stats["avg_compliance"] or 0, 1)
+    }
+
 
 @app.get("/api/history")
 async def get_history(request: Request):
@@ -280,17 +307,23 @@ async def get_history(request: Request):
                 (session_id,),
             ).fetchall()
 
-    analyses = [
-        HistoryItem(
-            analysis_id=r["id"],
-            company_name=r["company_name"],
-            risk_score=RiskLevel(r["overall_risk_score"]),
-            compliance_percentage=r["compliance_percentage"],
-            version=r["version"],
-            created_at=r["created_at"],
-        )
-        for r in rows
-    ]
+    analyses = []
+    for r in rows:
+        try:
+            created = r["created_at"]
+            created_str = created.isoformat() if hasattr(created, "isoformat") else str(created)
+            risk = r["overall_risk_score"] or "high"
+            analyses.append(HistoryItem(
+                analysis_id=r["id"],
+                company_name=r["company_name"],
+                risk_score=RiskLevel(risk),
+                compliance_percentage=r["compliance_percentage"] or 0,
+                version=r["version"] or 1,
+                created_at=created_str,
+            ))
+        except Exception as e:
+            logger.warning(f"Skipping history row {r['id']}: {e}")
+            continue
 
     return HistoryResponse(analyses=analyses)
 

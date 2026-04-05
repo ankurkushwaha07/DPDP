@@ -31,6 +31,7 @@ function AnalyzePageContent() {
   const [progress, setProgress] = useState<string>("Starting analysis...");
   const [isLoading, setIsLoading] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
 
   const changeStep = (s: Step) => {
     setStep(s);
@@ -118,6 +119,7 @@ function AnalyzePageContent() {
 
   const handleSubmit = async (data: AnalyzeRequestBody) => {
     setIsLoading(true);
+    setInitialInputs(data);
     setError(null);
     setStep("analyzing");
     setProgress("Submitting for analysis...");
@@ -150,6 +152,8 @@ function AnalyzePageContent() {
       });
 
       setResult(analysisResult);
+      setIsHistoryView(true);
+      setHistoryRefreshKey((k) => k + 1);
       changeStep("results");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Analysis failed");
@@ -213,6 +217,7 @@ function AnalyzePageContent() {
               window.location.href = `/analyze?history=${id}`;
             }}
             currentAnalysisId={analysisId}
+            refreshKey={historyRefreshKey}
           />
         </div>
       </aside>
@@ -280,7 +285,7 @@ function AnalyzePageContent() {
             onSubmit={handleSubmit} 
             isLoading={isLoading} 
             initialInputs={initialInputs}
-            isReadOnlyCompany={isHistoryView}
+            isHistoryView={isHistoryView}
           />
         )}
 

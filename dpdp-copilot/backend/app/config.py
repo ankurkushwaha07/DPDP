@@ -24,7 +24,7 @@ UPLOAD_DIR = "data/uploads"
 GENERATED_DIR = "data/generated"
 
 # === Database ===
-DB_PATH = os.getenv("DB_PATH", "data/copilot.db")
+DATABASE_URL = os.getenv("DATABASE_URL")
 
 # === ChromaDB ===
 CHROMA_DIR = os.getenv("CHROMA_DIR", "data/chroma_db")

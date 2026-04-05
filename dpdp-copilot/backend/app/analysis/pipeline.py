@@ -45,7 +45,7 @@ def run_analysis_pipeline(analysis_id: str) -> None:
                 return
 
             conn.execute(
-                "UPDATE analyses SET status = 'processing', updated_at = datetime('now') WHERE id = ?",
+                "UPDATE analyses SET status = 'processing', updated_at = CURRENT_TIMESTAMP WHERE id = ?",
                 (analysis_id,),
             )
 
@@ -103,9 +103,9 @@ def run_analysis_pipeline(analysis_id: str) -> None:
         with get_db() as conn:
             conn.execute(
                 """UPDATE analyses SET
-                   classifications = ?, obligations = ?, gap_report = ?,
+                   classifications = cast(? as jsonb), obligations = cast(? as jsonb), gap_report = cast(? as jsonb),
                    overall_risk_score = ?, compliance_percentage = ?,
-                   status = 'completed', updated_at = datetime('now')
+                   status = 'completed', updated_at = CURRENT_TIMESTAMP
                    WHERE id = ?""",
                 (classifications_json, obligations_json, gap_json,
                  risk_score, compliance_pct, analysis_id),
@@ -123,7 +123,7 @@ def run_analysis_pipeline(analysis_id: str) -> None:
         try:
             with get_db() as conn:
                 conn.execute(
-                    "UPDATE analyses SET status = 'failed', error_message = ?, updated_at = datetime('now') WHERE id = ?",
+                    "UPDATE analyses SET status = 'failed', error_message = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
                     (str(e)[:500], analysis_id),
                 )
         except Exception as db_err:

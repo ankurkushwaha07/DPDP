@@ -5,6 +5,13 @@ sentence-transformers==3.3.1
 PyMuPDF==1.25.1
 pydantic==2.10.0
 python-multipart==0.0.12
+fastapi==0.115.0
+uvicorn[standard]==0.30.0
+chromadb==0.5.23
+sentence-transformers==3.3.1
+PyMuPDF==1.25.1
+pydantic==2.10.0
+python-multipart==0.0.12
 google-generativeai==0.8.0
 python-dotenv==1.0.0
 python-docx==1.1.2
@@ -12,3 +19,5 @@ Jinja2==3.1.4
 slowapi==0.1.9
 pytest==8.3.0
 httpx==0.27.0
+psycopg[binary]==3.2.3
+psycopg-pool==3.2.4

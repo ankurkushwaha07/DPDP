@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { ClerkProvider, SignInButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs';
 
 export const metadata: Metadata = {
   title: "DPDP Compliance Copilot",
@@ -14,8 +15,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className="min-h-screen bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-100 flex flex-col transition-colors">
+    <ClerkProvider>
+      <html lang="en" suppressHydrationWarning>
+        <body className="min-h-screen bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-100 flex flex-col transition-colors">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-6 py-4 transition-colors">
             <div className="max-w-6xl mx-auto flex items-center justify-between">
@@ -30,6 +32,17 @@ export default function RootLayout({
                 <a href="/analyze" className="hover:text-teal-600 dark:hover:text-teal-400">Analyze</a>
                 <div className="w-px h-5 bg-gray-200 dark:bg-gray-800 mx-1" />
                 <ThemeToggle />
+                <div className="w-px h-5 bg-gray-200 dark:bg-gray-800 mx-1" />
+                <SignedOut>
+                  <SignInButton mode="modal">
+                    <button className="bg-teal-600 text-white px-4 py-1.5 rounded-lg text-sm font-medium hover:bg-teal-700 transition">
+                      Sign In
+                    </button>
+                  </SignInButton>
+                </SignedOut>
+                <SignedIn>
+                  <UserButton afterSignOutUrl="/" />
+                </SignedIn>
               </nav>
             </div>
           </header>
@@ -59,5 +72,6 @@ export default function RootLayout({
         </ThemeProvider>
       </body>
     </html>
+    </ClerkProvider>
   );
 }

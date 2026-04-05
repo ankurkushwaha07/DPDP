@@ -103,21 +103,12 @@ export default function StepDocuments({ documents, onRestart, isHistoryView, onB
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3 pt-4">
-        {isHistoryView && onBackToResults ? (
-          <button
-            onClick={onBackToResults}
-            className="flex-1 py-3 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 font-medium rounded-lg transition-colors"
-          >
-            {"<-"} Back to Analysis Results
-          </button>
-        ) : (
-          <button
-            onClick={onRestart}
-            className="flex-1 py-3 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 font-medium rounded-lg transition-colors"
-          >
-            {"<-"} Analyze Another Product
-          </button>
-        )}
+        <button
+          onClick={onBackToResults}
+          className="flex-1 py-3 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 font-medium rounded-lg transition-colors"
+        >
+          {"<-"} Back to Analysis Results
+        </button>
       </div>
     </div>
   );

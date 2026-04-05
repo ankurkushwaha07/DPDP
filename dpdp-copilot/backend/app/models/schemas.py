@@ -4,7 +4,7 @@ EVERY API input/output MUST use these models. No raw dicts.
 """
 
 from pydantic import BaseModel, Field, field_validator
-from typing import Optional
+from typing import Any, Optional
 from enum import Enum
 
 

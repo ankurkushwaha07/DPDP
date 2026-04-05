@@ -1,8 +1,8 @@
 -- Sessions: lightweight cookie-based tracking (no auth)
 CREATE TABLE IF NOT EXISTS sessions (
     id TEXT PRIMARY KEY,
-    created_at TEXT NOT NULL DEFAULT (datetime('now')),
-    last_seen_at TEXT NOT NULL DEFAULT (datetime('now'))
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    last_seen_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Analyses: stores input, output, and status of each compliance analysis
@@ -18,15 +18,15 @@ CREATE TABLE IF NOT EXISTS analyses (
     company_email TEXT,
     dpo_name TEXT,
     grievance_email TEXT,
-    classifications JSON NOT NULL DEFAULT '[]',
-    obligations JSON NOT NULL DEFAULT '[]',
-    gap_report JSON NOT NULL DEFAULT '[]',
+    classifications JSONB NOT NULL DEFAULT '[]'::jsonb,
+    obligations JSONB NOT NULL DEFAULT '[]'::jsonb,
+    gap_report JSONB NOT NULL DEFAULT '[]'::jsonb,
     overall_risk_score TEXT NOT NULL DEFAULT 'low',
     compliance_percentage INTEGER NOT NULL DEFAULT 0,
     status TEXT NOT NULL DEFAULT 'pending',
     error_message TEXT,
-    created_at TEXT NOT NULL DEFAULT (datetime('now')),
-    updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (session_id) REFERENCES sessions(id) ON DELETE SET NULL
 );
 
@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS documents (
     doc_type TEXT NOT NULL,
     markdown_content TEXT NOT NULL,
     file_path TEXT,
-    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (analysis_id) REFERENCES analyses(id) ON DELETE CASCADE
 );
 

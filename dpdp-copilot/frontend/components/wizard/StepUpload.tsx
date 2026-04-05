@@ -8,10 +8,10 @@ interface StepUploadProps {
   onSubmit: (data: AnalyzeRequestBody) => void;
   isLoading: boolean;
   initialInputs?: AnalyzeRequestBody | null;
-  isReadOnlyCompany?: boolean;
+  isHistoryView?: boolean;
 }
 
-export default function StepUpload({ onSubmit, isLoading, initialInputs, isReadOnlyCompany }: StepUploadProps) {
+export default function StepUpload({ onSubmit, isLoading, initialInputs, isHistoryView }: StepUploadProps) {
   const [productDesc, setProductDesc] = useState(initialInputs?.product_description || "");
   const [schemaText, setSchemaText] = useState(initialInputs?.schema_text || "");
   const [policyText, setPolicyText] = useState(initialInputs?.privacy_policy_text || "");
@@ -125,14 +125,16 @@ export default function StepUpload({ onSubmit, isLoading, initialInputs, isReadO
       <h2 className="text-xl font-bold">Step 1: Upload Your Data</h2>
 
       <div>
-        <label className="block text-sm font-medium mb-1">
-          Product Description <span className="text-red-500">*</span>
+        <label className="block text-sm font-medium mb-1 flex justify-between">
+          <span>Product Description <span className="text-red-500">*</span></span>
+          {isHistoryView && <span className="text-xs text-teal-600 dark:text-teal-400 font-semibold bg-teal-50 dark:bg-teal-900/30 px-2 py-0.5 rounded">Locked (History Mode)</span>}
         </label>
         <textarea
           value={productDesc}
           onChange={(e) => setProductDesc(e.target.value)}
+          disabled={isHistoryView}
           placeholder="Describe your product, what data it collects, and how it processes user information..."
-          className="w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 rounded-lg p-3 h-28 text-sm focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-colors"
+          className={`w-full border rounded-lg p-3 h-28 text-sm transition-colors ${isHistoryView ? "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700 cursor-not-allowed" : "border-gray-300 dark:border-gray-700 dark:bg-gray-900 focus:ring-2 focus:ring-teal-500 focus:border-transparent"}`}
         />
         {errors.productDesc && (
           <p className="text-red-500 dark:text-red-400 text-xs mt-1">{errors.productDesc}</p>
@@ -140,8 +142,9 @@ export default function StepUpload({ onSubmit, isLoading, initialInputs, isReadO
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-1">
-          Data Schema <span className="text-red-500">*</span>
+        <label className="block text-sm font-medium mb-1 flex justify-between">
+          <span>Data Schema <span className="text-red-500">*</span></span>
+          {isHistoryView && <span className="text-xs text-blue-600 dark:text-blue-400 font-semibold bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded">Editable</span>}
         </label>
         <div
           {...getSchemaRootProps()}
@@ -167,9 +170,15 @@ export default function StepUpload({ onSubmit, isLoading, initialInputs, isReadO
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-1">
-          Existing Privacy Policy <span className="text-gray-400">(optional)</span>
+        <label className="block text-sm font-medium mb-1 flex justify-between">
+          <span>Existing Privacy Policy <span className="text-gray-400">(optional)</span></span>
+          {isHistoryView && <span className="text-xs text-blue-600 dark:text-blue-400 font-semibold bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded">Editable to Patch Gaps</span>}
         </label>
+        {isHistoryView && (
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
+            You can update your privacy policy text below to patch identified gaps. Re-analyzing will create a new version of this analysis.
+          </p>
+        )}
         <div
           {...getPolicyRootProps()}
           className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg p-4 text-center cursor-pointer hover:border-teal-300 dark:hover:border-teal-600 transition-colors"
@@ -196,8 +205,8 @@ export default function StepUpload({ onSubmit, isLoading, initialInputs, isReadO
             <input
               value={company.name}
               onChange={(e) => setCompany({ ...company, name: e.target.value })}
-              disabled={isReadOnlyCompany}
-              className={`w-full border rounded-lg px-3 py-2 text-sm transition-colors ${isReadOnlyCompany ? "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700 cursor-not-allowed" : "border-gray-300 dark:border-gray-700 dark:bg-gray-900"}`}
+              disabled={isHistoryView}
+              className={`w-full border rounded-lg px-3 py-2 text-sm transition-colors ${isHistoryView ? "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700 cursor-not-allowed" : "border-gray-300 dark:border-gray-700 dark:bg-gray-900"}`}
               placeholder="Your Company Pvt Ltd"
             />
             {errors.companyName && (
@@ -212,8 +221,8 @@ export default function StepUpload({ onSubmit, isLoading, initialInputs, isReadO
               type="email"
               value={company.contact_email}
               onChange={(e) => setCompany({ ...company, contact_email: e.target.value })}
-              disabled={isReadOnlyCompany}
-              className={`w-full border rounded-lg px-3 py-2 text-sm transition-colors ${isReadOnlyCompany ? "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700 cursor-not-allowed" : "border-gray-300 dark:border-gray-700 dark:bg-gray-900"}`}
+              disabled={isHistoryView}
+              className={`w-full border rounded-lg px-3 py-2 text-sm transition-colors ${isHistoryView ? "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700 cursor-not-allowed" : "border-gray-300 dark:border-gray-700 dark:bg-gray-900"}`}
               placeholder="privacy@company.in"
             />
             {errors.email && <p className="text-red-500 dark:text-red-400 text-xs mt-1">{errors.email}</p>}
@@ -225,8 +234,8 @@ export default function StepUpload({ onSubmit, isLoading, initialInputs, isReadO
             <input
               value={company.dpo_name || ""}
               onChange={(e) => setCompany({ ...company, dpo_name: e.target.value })}
-              disabled={isReadOnlyCompany}
-              className={`w-full border rounded-lg px-3 py-2 text-sm transition-colors ${isReadOnlyCompany ? "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700 cursor-not-allowed" : "border-gray-300 dark:border-gray-700 dark:bg-gray-900"}`}
+              disabled={isHistoryView}
+              className={`w-full border rounded-lg px-3 py-2 text-sm transition-colors ${isHistoryView ? "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700 cursor-not-allowed" : "border-gray-300 dark:border-gray-700 dark:bg-gray-900"}`}
               placeholder="Data Protection Officer"
             />
           </div>
@@ -240,8 +249,8 @@ export default function StepUpload({ onSubmit, isLoading, initialInputs, isReadO
               onChange={(e) =>
                 setCompany({ ...company, grievance_email: e.target.value })
               }
-              disabled={isReadOnlyCompany}
-              className={`w-full border rounded-lg px-3 py-2 text-sm transition-colors ${isReadOnlyCompany ? "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700 cursor-not-allowed" : "border-gray-300 dark:border-gray-700 dark:bg-gray-900"}`}
+              disabled={isHistoryView}
+              className={`w-full border rounded-lg px-3 py-2 text-sm transition-colors ${isHistoryView ? "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700 cursor-not-allowed" : "border-gray-300 dark:border-gray-700 dark:bg-gray-900"}`}
               placeholder="grievance@company.in"
             />
           </div>
