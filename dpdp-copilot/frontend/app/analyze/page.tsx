@@ -233,11 +233,34 @@ function AnalyzePageContent() {
         "gap_report",
       ];
 
-      const { documents: docs } = await generateDocuments(analysisId, allDocTypes);
+      // Demo analysis IDs are not saved in the DB — run a real analysis first
+      let targetId = analysisId;
+      if (analysisId.startsWith("demo-") && initialInputs) {
+        changeStep("analyzing");
+        setProgress("Running analysis to generate your documents...");
+        const { analysis_id } = await startAnalysis(initialInputs);
+        await pollAnalysis(analysis_id, (status: StatusResponse) => {
+          if (status.step) {
+            const stepLabels: Record<string, string> = {
+              classifying_data: "Classifying data fields...",
+              mapping_obligations: "Mapping DPDP obligations...",
+              analyzing: "Running gap analysis...",
+              generating: "Preparing results...",
+            };
+            setProgress(stepLabels[status.step] || "Processing...");
+          }
+        });
+        targetId = analysis_id;
+        setAnalysisId(analysis_id);
+        changeStep("results");
+      }
+
+      const { documents: docs } = await generateDocuments(targetId, allDocTypes);
       setDocuments(docs);
       changeStep("documents");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Document generation failed");
+      changeStep("results");
     } finally {
       setIsGenerating(false);
     }
