@@ -278,6 +278,70 @@ async def get_admin_metrics():
     }
 
 
+@app.get("/api/admin/analyses")
+async def get_admin_analyses():
+    """Return detailed per-analysis data for the admin dashboard."""
+    with get_db() as conn:
+        rows = conn.execute("""
+            SELECT a.id, a.company_name, a.company_email, a.dpo_name,
+                   a.product_description, a.overall_risk_score,
+                   a.compliance_percentage, a.status, a.version,
+                   a.classifications, a.obligations, a.gap_report,
+                   a.created_at,
+                   (SELECT COUNT(*) FROM documents d WHERE d.analysis_id = a.id) as doc_count
+            FROM analyses a
+            WHERE a.status = 'completed'
+            ORDER BY a.created_at DESC
+            LIMIT 100
+        """).fetchall()
+
+    analyses = []
+    for r in rows:
+        try:
+            created = r["created_at"]
+            created_str = created.isoformat() if hasattr(created, "isoformat") else str(created)
+
+            # Parse JSONB fields
+            raw_cls = r["classifications"]
+            raw_obl = r["obligations"]
+            raw_gap = r["gap_report"]
+            cls = json.loads(raw_cls) if isinstance(raw_cls, str) else (raw_cls or [])
+            obl = json.loads(raw_obl) if isinstance(raw_obl, str) else (raw_obl or [])
+            gap = json.loads(raw_gap) if isinstance(raw_gap, str) else (raw_gap or [])
+
+            # Summarize gap statuses
+            compliant = sum(1 for g in gap if isinstance(g, dict) and g.get("status") == "compliant")
+            partial = sum(1 for g in gap if isinstance(g, dict) and g.get("status") == "partial")
+            missing = sum(1 for g in gap if isinstance(g, dict) and g.get("status") == "missing")
+            critical = sum(1 for g in gap if isinstance(g, dict) and g.get("severity") == "critical")
+
+            analyses.append({
+                "id": r["id"],
+                "company_name": r["company_name"] or "Unknown",
+                "company_email": r["company_email"] or "",
+                "dpo_name": r["dpo_name"] or "",
+                "product_description": (r["product_description"] or "")[:150],
+                "risk_score": r["overall_risk_score"] or "high",
+                "compliance_percentage": r["compliance_percentage"] or 0,
+                "version": r["version"] or 1,
+                "total_fields": len(cls),
+                "total_obligations": len(obl),
+                "gap_summary": {
+                    "compliant": compliant,
+                    "partial": partial,
+                    "missing": missing,
+                    "critical": critical,
+                },
+                "doc_count": r["doc_count"] or 0,
+                "created_at": created_str,
+            })
+        except Exception as e:
+            logger.warning(f"Skipping admin row {r['id']}: {e}")
+            continue
+
+    return {"analyses": analyses}
+
+
 @app.get("/api/history")
 async def get_history(request: Request):
     """Return all past analyses (demo mode: bypass session if local)."""

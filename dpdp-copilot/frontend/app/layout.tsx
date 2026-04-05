@@ -30,6 +30,9 @@ export default function RootLayout({
               <nav className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-300">
                 <a href="/" className="hover:text-teal-600 dark:hover:text-teal-400">Home</a>
                 <a href="/analyze" className="hover:text-teal-600 dark:hover:text-teal-400">Analyze</a>
+                <SignedIn>
+                  <a href="/admin" className="hover:text-teal-600 dark:hover:text-teal-400">Admin</a>
+                </SignedIn>
                 <div className="w-px h-5 bg-gray-200 dark:bg-gray-800 mx-1" />
                 <ThemeToggle />
                 <div className="w-px h-5 bg-gray-200 dark:bg-gray-800 mx-1" />
