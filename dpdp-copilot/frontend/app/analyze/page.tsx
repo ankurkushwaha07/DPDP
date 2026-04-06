@@ -72,6 +72,7 @@ function AnalyzePageContent() {
   const [isLoading, setIsLoading] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
+  const [historyDrawerOpen, setHistoryDrawerOpen] = useState(false);
 
   const changeStep = (s: Step) => {
     setStep(s);
@@ -308,6 +309,42 @@ function AnalyzePageContent() {
         </div>
       )}
 
+    {/* Mobile history drawer */}
+    {!isGuest && historyDrawerOpen && (
+      <div className="fixed inset-0 z-50 lg:hidden">
+        {/* Backdrop */}
+        <div
+          className="absolute inset-0 bg-black/40"
+          onClick={() => setHistoryDrawerOpen(false)}
+        />
+        {/* Drawer panel */}
+        <div className="absolute left-0 top-0 h-full w-72 bg-white dark:bg-gray-900 shadow-xl flex flex-col">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-800">
+            <span className="font-semibold text-sm text-gray-700 dark:text-gray-200">Past Analyses</span>
+            <button
+              onClick={() => setHistoryDrawerOpen(false)}
+              className="p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"
+              aria-label="Close history"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          <div className="flex-1 overflow-y-auto">
+            <HistorySidebar
+              onSelectAnalysis={(id) => {
+                setHistoryDrawerOpen(false);
+                window.location.href = `/analyze?history=${id}`;
+              }}
+              currentAnalysisId={analysisId}
+              refreshKey={historyRefreshKey}
+            />
+          </div>
+        </div>
+      </div>
+    )}
+
     <div className="flex gap-4 sm:gap-6 pt-6 sm:pt-10">
       {!isGuest && (
       <aside className="hidden lg:block w-64 flex-shrink-0">
@@ -324,6 +361,20 @@ function AnalyzePageContent() {
       )}
 
       <div className="flex-1 min-w-0">
+        {/* Mobile history button — visible only below lg breakpoint */}
+        {!isGuest && (
+          <div className="lg:hidden flex justify-end mb-3">
+            <button
+              onClick={() => setHistoryDrawerOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-teal-700 dark:text-teal-400 bg-teal-50 dark:bg-teal-900/20 border border-teal-200 dark:border-teal-800 rounded-lg hover:bg-teal-100 dark:hover:bg-teal-900/40 transition-colors"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              History
+            </button>
+          </div>
+        )}
         <div className="flex items-center justify-center gap-1 sm:gap-2 mb-6 sm:mb-10">
           {steps.map((s, i) => {
             const isClickable = isHistoryView && result != null;
