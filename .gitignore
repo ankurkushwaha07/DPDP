@@ -12,6 +12,9 @@ __pycache__/
 .env
 .env.local
 
+# Claude Code
+.claude/
+
 # Databases and Local Data
 data/copilot.db
 data/uploads/
