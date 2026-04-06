@@ -42,8 +42,12 @@ const RISK_COLORS: Record<string, string> = {
   low: "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400",
 };
 
+const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
+
 export default function AdminPage() {
-  const { isSignedIn, isLoaded } = useUser();
+  const { isSignedIn, isLoaded, user } = useUser();
+  const isAdmin = isSignedIn && ADMIN_EMAIL &&
+    user?.primaryEmailAddress?.emailAddress === ADMIN_EMAIL;
   const [metrics, setMetrics] = useState<Metrics | null>(null);
   const [analyses, setAnalyses] = useState<AnalysisDetail[]>([]);
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -52,8 +56,9 @@ export default function AdminPage() {
 
   useEffect(() => {
     if (!isLoaded) return;
+    if (!isAdmin) return;
     void loadData();
-  }, [isLoaded]);
+  }, [isLoaded, isAdmin]);
 
   const loadData = async () => {
     setLoading(true);
@@ -83,13 +88,13 @@ export default function AdminPage() {
     );
   }
 
-  if (!isSignedIn) {
+  if (!isAdmin) {
     return (
       <div className="flex h-[80vh] items-center justify-center p-6 text-center">
         <div>
           <ShieldCheck className="h-16 w-16 mx-auto text-red-500 mb-4" />
           <h1 className="text-3xl font-bold dark:text-gray-100 mb-2">Unauthorized</h1>
-          <p className="text-gray-500 dark:text-gray-400">Please sign in to access the admin dashboard.</p>
+          <p className="text-gray-500 dark:text-gray-400">You do not have permission to access this page.</p>
         </div>
       </div>
     );

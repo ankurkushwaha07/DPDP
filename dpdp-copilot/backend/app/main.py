@@ -440,34 +440,22 @@ async def get_admin_analyses():
 
 @app.get("/api/history")
 async def get_history(request: Request):
-    """Return past analyses. Session-scoped when cookie present, global fallback otherwise."""
+    """Return past analyses scoped strictly to the current session cookie."""
     session_id = request.cookies.get(SESSION_COOKIE_NAME)
 
-    with get_db() as conn:
-        if session_id:
-            # Try session-scoped history first
-            rows = conn.execute(
-                """SELECT id, company_name, overall_risk_score, compliance_percentage,
-                          version, status, created_at
-                   FROM analyses
-                   WHERE session_id = ? AND status = 'completed'
-                   ORDER BY created_at DESC
-                   LIMIT 20""",
-                (session_id,),
-            ).fetchall()
-        else:
-            rows = []
+    if not session_id:
+        return HistoryResponse(analyses=[])
 
-        # If no session history, return all completed analyses (cross-session fallback)
-        if not rows:
-            rows = conn.execute(
-                """SELECT id, company_name, overall_risk_score, compliance_percentage,
-                          version, status, created_at
-                   FROM analyses
-                   WHERE status = 'completed'
-                   ORDER BY created_at DESC
-                   LIMIT 50"""
-            ).fetchall()
+    with get_db() as conn:
+        rows = conn.execute(
+            """SELECT id, company_name, overall_risk_score, compliance_percentage,
+                      version, status, created_at
+               FROM analyses
+               WHERE session_id = ? AND status = 'completed'
+               ORDER BY created_at DESC
+               LIMIT 20""",
+            (session_id,),
+        ).fetchall()
 
     analyses = []
     for r in rows:
