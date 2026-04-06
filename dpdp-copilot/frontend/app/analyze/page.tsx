@@ -166,25 +166,27 @@ function AnalyzePageContent() {
     setStep("analyzing");
     setProgress("Submitting for analysis...");
 
-    try {
-      // If this is a demo scenario, use pre-computed results instantly
-      if (demoScenario && ["ecommerce", "edtech", "healthtech"].includes(demoScenario)) {
-        setProgress("Loading demo results...");
-        const demoResult = await loadDemo(demoScenario as "ecommerce" | "edtech" | "healthtech");
-        if (demoResult.status === "completed" && demoResult.result) {
-          setAnalysisId(demoResult.analysis_id);
-          setResult(demoResult.result);
-          changeStep("results");
-          return;
-        }
-        throw new Error("Demo data unavailable");
+    // Cycle progress messages during the analysis POST (gives live UX feedback)
+    const progressSteps = [
+      "Classifying data fields...",
+      "Mapping DPDP obligations...",
+      "Running gap analysis...",
+      "Preparing results...",
+    ];
+    let stepIdx = 0;
+    const progressTimer = setInterval(() => {
+      if (stepIdx < progressSteps.length) {
+        setProgress(progressSteps[stepIdx++]);
       }
+    }, 1000);
 
+    try {
       if (isHistoryView && analysisId) {
         data.parent_analysis_id = analysisId;
       }
 
       const { analysis_id } = await startAnalysis(data);
+      clearInterval(progressTimer);
       setAnalysisId(analysis_id);
       setIsHistoryView(false);
 
@@ -211,6 +213,7 @@ function AnalyzePageContent() {
       setHistoryRefreshKey((k) => k + 1);
       changeStep("results");
     } catch (err) {
+      clearInterval(progressTimer);
       setError(err instanceof Error ? err.message : "Analysis failed");
       changeStep("upload");
     } finally {
@@ -233,9 +236,10 @@ function AnalyzePageContent() {
         "gap_report",
       ];
 
-      // Demo analysis IDs are not saved in the DB — run a real analysis first
+      // Old hardcoded demo IDs (demo-*) are not in the DB — run real analysis first.
+      // New cached demo IDs (cached-demo-*) are in the DB and can generate docs directly.
       let targetId = analysisId;
-      if (analysisId.startsWith("demo-") && initialInputs) {
+      if (analysisId && analysisId.startsWith("demo-") && !analysisId.startsWith("cached-demo-") && initialInputs) {
         changeStep("analyzing");
         setProgress("Running analysis to generate your documents...");
         const { analysis_id } = await startAnalysis(initialInputs);

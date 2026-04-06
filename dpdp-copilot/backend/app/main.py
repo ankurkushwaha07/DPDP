@@ -15,6 +15,7 @@ import json
 import os
 import uuid
 import logging
+import asyncio
 from fastapi import FastAPI, BackgroundTasks, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
@@ -31,6 +32,9 @@ from app.models.schemas import (
 from app.db.database import init_db, get_db
 from app.analysis.pipeline import run_analysis_pipeline
 from app.analysis.validator import validate_inputs, ValidationError
+from app.analysis.demo_cache import (
+    detect_demo_scenario, get_cached_demo_analysis_id, has_cached_demo, mark_demo_cached, DEMO_INPUTS
+)
 from app.config import (
     MAX_ANALYSES_PER_IP_PER_HOUR, FRONTEND_URL, LOG_LEVEL, LOG_DIR,
     SESSION_COOKIE_NAME, SESSION_COOKIE_MAX_AGE, ENVIRONMENT,
@@ -88,6 +92,63 @@ async def startup():
     os.makedirs("data/uploads", exist_ok=True)
     os.makedirs("data/generated", exist_ok=True)
     logger.info("DPDP Compliance Copilot started")
+    # Seed demo results in background — runs per deployment, skips if already cached
+    asyncio.create_task(_seed_demo_cache())
+
+
+async def _seed_demo_cache():
+    """
+    Pre-generate real analysis results for all demo scenarios on startup.
+    Skips any scenario already cached. Runs in background so startup isn't blocked.
+    """
+    for scenario in ["ecommerce", "edtech", "healthtech"]:
+        if has_cached_demo(scenario):
+            logger.info(f"Demo cache: '{scenario}' already cached — skipping")
+            continue
+
+        logger.info(f"Demo cache: seeding '{scenario}'...")
+        demo_id = f"seed-demo-{scenario}"
+        inputs = DEMO_INPUTS[scenario]
+
+        try:
+            with get_db() as conn:
+                existing = conn.execute("SELECT id FROM analyses WHERE id = ?", (demo_id,)).fetchone()
+                if not existing:
+                    conn.execute(
+                        """INSERT INTO analyses
+                           (id, session_id, version, parent_id,
+                            product_description, input_schema, privacy_policy_text,
+                            company_name, company_email, dpo_name, grievance_email,
+                            classifications, obligations, gap_report,
+                            overall_risk_score, compliance_percentage, status)
+                           VALUES (?, 'demo-seed', 1, NULL, ?, ?, ?, ?, ?, ?, ?, '[]', '[]', '[]', 'low', 0, 'pending')""",
+                        (
+                            demo_id,
+                            inputs["product_description"],
+                            inputs["schema_text"],
+                            inputs["privacy_policy_text"],
+                            inputs["company_details"]["name"],
+                            inputs["company_details"]["contact_email"],
+                            inputs["company_details"]["dpo_name"],
+                            inputs["company_details"]["grievance_email"],
+                        ),
+                    )
+
+            # run_analysis_pipeline is synchronous — offload to thread pool
+            await asyncio.to_thread(run_analysis_pipeline, demo_id)
+
+            # Verify pipeline completed
+            with get_db() as conn:
+                row = conn.execute("SELECT status FROM analyses WHERE id = ?", (demo_id,)).fetchone()
+
+            if row and row["status"] == "completed":
+                mark_demo_cached(scenario, demo_id)
+                logger.info(f"Demo cache: '{scenario}' seeded successfully")
+            else:
+                status_val = row["status"] if row else "not found"
+                logger.warning(f"Demo cache: '{scenario}' pipeline incomplete (status={status_val})")
+        except Exception as exc:
+            logger.error(f"Demo cache: failed to seed '{scenario}': {exc}", exc_info=True)
 
 
 # === Session Management ===
@@ -138,8 +199,35 @@ async def analyze(request: Request, body: AnalyzeRequest, background_tasks: Back
     except ValidationError as e:
         raise HTTPException(status_code=422, detail=str(e))
 
-    analysis_id = str(uuid.uuid4())
     session_id = get_or_create_session(request)
+
+    # Check if this is an unmodified demo scenario with cached results
+    demo_scenario = detect_demo_scenario(
+        body.product_description,
+        body.schema_text,
+        body.privacy_policy_text or "",
+        body.company_details.model_dump(),
+    )
+
+    if demo_scenario and has_cached_demo(demo_scenario):
+        # Serve cached demo results with a 4-second artificial delay.
+        # The delay runs BEFORE responding so the frontend shows the
+        # "analyzing" progress screen and feels like real processing.
+        cached_analysis_id = get_cached_demo_analysis_id(demo_scenario)
+        logger.info(f"Demo cache hit for '{demo_scenario}' — adding UX delay")
+        await asyncio.sleep(4)
+
+        response_data = AnalyzeResponse(
+            analysis_id=cached_analysis_id,
+            status=AnalysisStatus.PROCESSING,
+            poll_url=f"/api/analyze/{cached_analysis_id}/status",
+        )
+
+        response = JSONResponse(content=response_data.model_dump(), status_code=202)
+        return _set_session_cookie(response, session_id)
+
+    # Normal analysis flow
+    analysis_id = str(uuid.uuid4())
 
     # Determine version
     version = 1
@@ -417,6 +505,32 @@ async def generate(request: Request, body: GenerateRequest):
         raise HTTPException(status_code=404, detail="Analysis not found")
     if row["status"] != "completed":
         raise HTTPException(status_code=400, detail="Analysis not yet completed")
+
+    # For cached demo analyses, return already-generated documents if they exist.
+    # This avoids re-generating docs on every request for demo scenarios.
+    if body.analysis_id.startswith("cached-demo-"):
+        requested_types = {dt.value if hasattr(dt, "value") else str(dt) for dt in body.document_types}
+        with get_db() as conn:
+            existing_docs = conn.execute(
+                "SELECT id, doc_type, markdown_content FROM documents WHERE analysis_id = ?",
+                (body.analysis_id,)
+            ).fetchall()
+        existing_types = {d["doc_type"] for d in existing_docs}
+
+        if requested_types.issubset(existing_types):
+            # All requested docs already cached — return them directly
+            from app.models.schemas import DocumentItem, DocType
+            logger.info(f"Demo doc cache hit for '{body.analysis_id}'")
+            cached_docs = [
+                DocumentItem(
+                    doc_type=DocType(d["doc_type"]),
+                    markdown_preview=d["markdown_content"][:2000],
+                    download_url=f"/api/download/{d['id']}",
+                )
+                for d in existing_docs
+                if d["doc_type"] in requested_types
+            ]
+            return GenerateResponse(documents=cached_docs)
 
     try:
         from app.generation.generator import generate_documents
